@@ -28,6 +28,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import Password from "./Layout/Auth/Password"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 // import config from "@/config"
 
@@ -52,7 +53,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
 
-
+const router = useRouter()
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -82,16 +83,17 @@ export function LoginForm({
       const result = await res.json();
       console.log("from result", result);
 
-      // if (result.status || result.success) {
-      //   toast.success(result.message); 
-      // } else {
-      //   // Handle error returned from backend
-      //   const errorMessage = result?.message || "Something went wrong";
-      //   toast.error(errorMessage); 
-      // }
+      if (result.status || result.success) {
+        toast.success(result.message); 
+        router.push('/')
+      } else if(!result.success) {
+        // Handle error returned from backend
+        // const errorMessage = result?.message || "Something went wrong";
+        toast.error(result.message); 
+      }
     } catch (error: any) {
       console.log(error);
-      toast.error("Failed to register user");
+      toast.error("Failed to log in user");
     }
   };
 

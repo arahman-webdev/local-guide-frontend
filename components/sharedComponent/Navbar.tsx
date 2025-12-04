@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import logo from "@/app/images/logo.png";
 import Link from "next/link";
-import { Menu, X, User, LogOut } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Menu } from "lucide-react";
+
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
@@ -17,14 +17,16 @@ export default function Navbar() {
     const pathName = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState<{ name: string; role?: string } | null>(null);
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchUser = async () => {
             const response = await getMyProfile();
             setUser(response?.data || null);
+            setLoading(false)
         };
         fetchUser();
-    }, []);
+    }, [pathName]);
 
     // Logout
     const handleLogout = async () => {
@@ -63,6 +65,7 @@ export default function Navbar() {
 
     return (
         <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b shadow-md">
+            
             <div className="w-full px-4 flex justify-between items-center h-20">
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
@@ -95,7 +98,11 @@ export default function Navbar() {
 
                 {/* Desktop Profile */}
                 <div>
-                    {user ? (
+
+
+                  {
+                    !loading && (
+                           user ? (
                         <div className="hidden lg:block">
                             <ProfileOpen name={user.name} role={user.role} logout={handleLogout} />
                         </div>
@@ -117,11 +124,12 @@ export default function Navbar() {
                         </div>
 
                     )
-                    }
+                    )
+                  }
                 </div>
 
                 {/* Mobile Menu */}
-                <div className="lg:hidden">
+                <div className="lg:hidden bg-blue-50">
                     <Sheet open={isOpen} onOpenChange={setIsOpen}>
                         <SheetTrigger asChild>
                             <Button variant="outline">
