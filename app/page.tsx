@@ -1,4 +1,4 @@
-import { SheetDemo } from "@/components/CheckSheet";
+
 import FeaturedSection from "@/components/Layout/Home/FeaturedSection";
 import Hero from "@/components/Layout/Home/Hero";
 import HowItWork from "@/components/Layout/Home/HowItWork";
@@ -18,7 +18,7 @@ export default function Home() {
       <PopularCategories />
       <TopRatedGuide />
       <Testimonial />
-      <SheetDemo />
+      
     </>
   );
 }

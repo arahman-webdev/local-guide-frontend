@@ -1,129 +1,171 @@
-
-
 "use client";
 
 import React, { useState, useEffect } from "react";
-
 import Image from "next/image";
 import logo from "@/app/images/logo.png";
 import Link from "next/link";
-import { PhoneCall, Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { getMyProfile } from "@/app/utility/auth";
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 
-
+import { getMyProfile, logOut } from "@/app/utility/auth";
+import { ProfileOpen } from "../Layout/Auth/ProfileOpen";
 
 export default function Navbar() {
-    const [isOpen, setIsOpen] = useState(false);
     const pathName = usePathname();
-
+    const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState<{ name: string; role?: string } | null>(null);
-    const [loading, setLoading] = useState(true);
-
-  
 
     useEffect(() => {
         const fetchUser = async () => {
-            const response = await getMyProfile()
-            setUser(response?.data || null)
-        }
-        fetchUser()
-    }, [])
+            const response = await getMyProfile();
+            setUser(response?.data || null);
+        };
+        fetchUser();
+    }, []);
 
-    if(loading){
-        <div>Loadig.......</div>
-    }
-
-    console.log("user", user)
-
-
-    // ✅ Handle logout
+    // Logout
     const handleLogout = async () => {
-        try {
-            const res = await fetch(
-                "https://abdurrahman-dev-portfolio-backend.vercel.app/api/v1/auth/logout",
-                {
-                    method: "POST",
-                    credentials: "include",
-                }
-            );
-
-            if (res.ok) {
-                setUser(null);
-                console.log("✅ Logged out successfully");
-            } else {
-                console.error("Logout failed");
-            }
-        } catch (error) {
-            console.error("Logout error:", error);
-        }
+        const response = await logOut();
+        if (response.success) setUser(null);
     };
 
-    return (
-        <nav className="absolute top-0 left-0 w-full z-50 py-5 px-3 bg-transparent">
-            <div className="flex justify-between items-center container mx-auto">
-                {/* Logo + Links */}
-                <div className="flex items-center gap-10">
-                    <Image src={logo} alt="logo" width={140} height={140} />
+    // Navigation items by role
+    const navItems = user
+        ? user.role === "ADMIN"
+            ? [
+                { name: "Home", href: "/" },
+                { name: "Admin Dashboard", href: "/admin" },
+                { name: "Manage Users", href: "/admin/users" },
+                { name: "Manage Listings", href: "/admin/listings" },
+            ]
+            : user.role === "GUIDE"
+                ? [
+                    { name: "Home", href: "/" },
+                    { name: "Explore Tours", href: "/tours" },
+                    { name: "Dashboard", href: "/dashboard" },
+                    { name: "Profile", href: "/profile" },
+                ]
+                : [
+                    { name: "Home", href: "/" },
+                    { name: "Explore Tours", href: "/tours" },
+                    { name: "My Bookings", href: "/bookings" },
+                    { name: "Profile", href: "/profile" },
+                ]
+        : [
+            { name: "Home", href: "/" },
+            { name: "Explore Tours", href: "/tours" },
+            { name: "Become a Guide", href: "/register?role=guide" },
 
-                    {/* Desktop Menu */}
-                    <ul className="hidden lg:flex gap-6 font-medium uppercase tracking-wide">
-                        {[
-                            { name: "Home", href: "/" },
-                            { name: "About", href: "/about" },
-                            { name: "Blog", href: "/blog" },
-                            { name: "Project", href: "/project" },
-                            { name: "Products", href: "/products" },
-                            { name: "Contact", href: "/contact" },
-                        ].map((item) => (
+        ];
+
+    return (
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b shadow-md">
+            <div className="w-full px-4 flex justify-between items-center h-20">
+                {/* Logo */}
+                <Link href="/" className="flex items-center">
+                    <Image src={logo} alt="Logo" width={160} height={60} />
+                </Link>
+
+                {/* Desktop Menu */}
+                <ul className="hidden lg:flex gap-6 font-semibold text-blue-700 uppercase tracking-wider">
+                    {navItems.map((item) =>
+                        item.name === "Logout" ? (
+                            <button
+                                key={item.name}
+                                onClick={handleLogout}
+                                className="hover:text-indigo-500 transition-colors"
+                            >
+                                Logout
+                            </button>
+                        ) : (
                             <Link
-                                key={item.href}
+                                key={item.name}
                                 href={item.href}
-                                className={`transition-colors ${pathName === item.href
-                                        ? "text-blue-400 underline"
-                                        : "text-white hover:text-indigo-400"
+                                className={`transition-colors ${pathName === item.href ? "text-indigo-500 underline" : "hover:text-indigo-500"
                                     }`}
                             >
                                 {item.name}
                             </Link>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Right Section */}
-                <div className="hidden lg:flex gap-10 items-center">
-                    <div className="flex items-center gap-3 text-white">
-                        <PhoneCall className="text-indigo-400" />
-                        <div className="leading-tight">
-                            <p className="text-gray-300 text-sm">Have any question? {user?.name}</p>
-                            <p className="font-bold text-white">+880 1719617907</p>
-                        </div>
-                    </div>
-
-                    {!loading && (
-                        <>
-                            {user ? (
-                                // <ProfileOpen name={user.name} role={user.role} MyDashboard='' logout={handleLogout} />
-                                <div>Logout</div>
-
-                            ) : (
-                                <Link
-                                    href="/login"
-                                    className="bg-linear-to-r from-indigo-500 via-purple-500 to-blue-600 text-white text-sm rounded-md py-2 px-6 font-semibold uppercase shadow-lg hover:scale-105 transition-transform duration-300"
-                                >
-                                    Login
-                                </Link>
-                            )}
-                        </>
+                        )
                     )}
+                </ul>
+
+                {/* Desktop Profile */}
+                <div>
+                    {user ? (
+                        <div className="hidden lg:block">
+                            <ProfileOpen name={user.name} role={user.role} logout={handleLogout} />
+                        </div>
+                    ) : (
+                        <div className="flex gap-2.5">
+
+                            <Link
+                                href="/login"
+                                className="w-full bg-linear-to-r from-indigo-500 via-blue-900 to-blue-600 text-center text-white font-semibold py-2 px-5 rounded-md shadow-lg hover:scale-105 transition-transform duration-300"
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                href="/signup"
+                                className="w-full bg-linear-to-r from-red-500 via-red-900 to-red-600 text-center text-white font-semibold py-2 px-5 rounded-md shadow-lg hover:scale-105 transition-transform duration-300"
+                            >
+                                SignUp
+                            </Link>
+                        </div>
+
+                    )
+                    }
                 </div>
 
-                
+                {/* Mobile Menu */}
+                <div className="lg:hidden">
+                    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                        <SheetTrigger asChild>
+                            <Button variant="outline">
+                                <Menu size={24} />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="right" className="w-64">
+                            <SheetHeader>
+                                <SheetTitle>Menu</SheetTitle>
+                            </SheetHeader>
+                            <ul className="flex flex-col gap-4 mt-4">
+                                {navItems.map((item) =>
+                                    item.name === "Logout" ? (
+                                        <button
+                                            key={item.name}
+                                            onClick={() => {
+                                                handleLogout();
+                                                setIsOpen(false);
+                                            }}
+                                            className="text-left font-semibold text-blue-700 hover:text-indigo-500"
+                                        >
+                                            Logout
+                                        </button>
+                                    ) : (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            onClick={() => setIsOpen(false)}
+                                            className={`font-semibold text-blue-700 hover:text-indigo-500`}
+                                        >
+                                            {item.name}
+                                        </Link>
+                                    )
+                                )}
+                            </ul>
+                            {user && (
+                                <div className="mt-6">
+                                    <ProfileOpen name={user.name} role={user.role} logout={handleLogout} />
+                                </div>
+                            )}
+                        </SheetContent>
+                    </Sheet>
+                </div>
             </div>
-
-          
         </nav>
     );
 }
