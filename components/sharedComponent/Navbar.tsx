@@ -8,7 +8,7 @@ import { Menu } from "lucide-react";
 
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 import { getMyProfile, logOut } from "@/app/utility/auth";
 import { ProfileOpen } from "../Layout/Auth/ProfileOpen";
@@ -16,7 +16,7 @@ import { ProfileOpen } from "../Layout/Auth/ProfileOpen";
 export default function Navbar() {
     const pathName = usePathname();
     const [isOpen, setIsOpen] = useState(false);
-    const [user, setUser] = useState<{ name: string; role?: string } | null>(null);
+    const [user, setUser] = useState<{ name: string; role?: string,profilePic:string } | null>(null);
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -63,6 +63,8 @@ export default function Navbar() {
 
         ];
 
+        console.log(user)
+
     return (
         <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b shadow-md">
             
@@ -104,7 +106,7 @@ export default function Navbar() {
                     !loading && (
                            user ? (
                         <div className="hidden lg:block">
-                            <ProfileOpen name={user.name} role={user.role} logout={handleLogout} />
+                            <ProfileOpen name={user.name} role={user.role} profilePic={user.profilePic} logout={handleLogout} />
                         </div>
                     ) : (
                         <div className="flex gap-2.5">
@@ -166,8 +168,8 @@ export default function Navbar() {
                                 )}
                             </ul>
                             {user && (
-                                <div className="mt-6">
-                                    <ProfileOpen name={user.name} role={user.role} logout={handleLogout} />
+                                <div className="mt-6 border-8">
+                                    <ProfileOpen name={user.name} role={user.role} profilePic={user.profilePic} logout={handleLogout}/>
                                 </div>
                             )}
                         </SheetContent>
