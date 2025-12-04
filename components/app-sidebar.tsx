@@ -40,10 +40,10 @@ const navData = {
   ADMIN: {
     navMain: [
       { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
-      { title: "Manage Users", url: "/admin/users", icon: IconUsers },
-      { title: "Manage Tours", url: "/admin/tour-listings", icon: IconMap },
-      { title: "Bookings", url: "/admin/bookings", icon: IconCalendar },
-      { title: "Reviews", url: "/admin/reviews", icon: IconStar },
+      { title: "Manage Users", url: "/dashboard/admin/users", icon: IconUsers },
+      { title: "Manage Tours", url: "/dashboard/admin/tour-listings", icon: IconMap },
+      { title: "Bookings", url: "/dashboard/admin/bookings", icon: IconCalendar },
+      { title: "Reviews", url: "/dashboard/admin/reviews", icon: IconStar },
       { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
     ],
     navSecondary: [
