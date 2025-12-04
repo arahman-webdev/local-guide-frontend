@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 
 export function ProfileOpen({ name,profilePic, role, logout }: { name: string;profilePic?:string, role?: string; logout: () => void }) {
@@ -16,14 +17,15 @@ export function ProfileOpen({ name,profilePic, role, logout }: { name: string;pr
         <div className="flex flex-col gap-3">
           <p className="font-semibold text-gray-700">{name}</p>
           <p className="text-sm text-gray-500">{role}</p>
-          <Link href="/profile" className="text-blue-700 hover:text-indigo-500 font-medium">
+          <Link href="/dashboard/profile" className="text-blue-700 hover:text-indigo-500 font-medium">
             My Profile
           </Link>
           <button
             onClick={logout}
-            className="text-left text-red-500 hover:text-red-600 font-medium"
+            className="text-left text-red-500 hover:text-red-700 font-medium flex gap-2 cursor-pointer"
           >
-            Logout
+            <LogOut />Logout
+            
           </button>
         </div>
       </PopoverContent>

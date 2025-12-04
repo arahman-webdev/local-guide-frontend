@@ -39,7 +39,7 @@ export default function Navbar() {
         ? user.role === "ADMIN"
             ? [
                 { name: "Home", href: "/" },
-                { name: "Admin Dashboard", href: "/admin" },
+                { name: "Admin Dashboard", href: "/dashboard/admin" },
                 { name: "Manage Users", href: "/admin/users" },
                 { name: "Manage Listings", href: "/admin/listings" },
             ]
@@ -48,18 +48,21 @@ export default function Navbar() {
                     { name: "Home", href: "/" },
                     { name: "Explore Tours", href: "/tours" },
                     { name: "Dashboard", href: "/dashboard" },
-                    { name: "Profile", href: "/profile" },
+                    { name: "Profile", href: "/dashboard/profile" },
                 ]
                 : [
                     { name: "Home", href: "/" },
                     { name: "Explore Tours", href: "/tours" },
                     { name: "My Bookings", href: "/bookings" },
-                    { name: "Profile", href: "/profile" },
+                    { name: "Profile", href: "/dashboard/profile" },
                 ]
         : [
             { name: "Home", href: "/" },
             { name: "Explore Tours", href: "/tours" },
             { name: "Become a Guide", href: "/register?role=guide" },
+            { name: "About", href: "/about" },
+            { name: "Blog", href: "/blog" },
+            { name: "Contact", href: "/contact" },
 
         ];
 

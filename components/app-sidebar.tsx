@@ -2,24 +2,21 @@
 
 import * as React from "react"
 import {
-  IconCamera,
-  IconChartBar,
   IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
   IconUsers,
-} from "@tabler/icons-react"
+  IconMap,
+  IconMapSearch,
+  IconCalendar,
+  IconStar,
+  IconUserCircle,
+  IconSettings,
+  IconHelp,
+  IconSearch,
+  IconHeart,
+  IconPlus,
+  IconLayout2,
+} from "@tabler/icons-react";
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -32,149 +29,121 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
+import Image from "next/image"
+import logo from "@/app/images/logo.png"
+import { getMyProfile } from "@/app/utility/auth";
+import { IUser } from "@/types/commonType";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+
+const navData = {
+  ADMIN: {
+    navMain: [
+      { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
+      { title: "Manage Users", url: "/admin/users", icon: IconUsers },
+      { title: "Manage Tours", url: "/admin/tour-listings", icon: IconMap },
+      { title: "Bookings", url: "/admin/bookings", icon: IconCalendar },
+      { title: "Reviews", url: "/admin/reviews", icon: IconStar },
+      { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
+    ],
+    navSecondary: [
+      { title: "Settings", url: "/admin/settings", icon: IconSettings },
+      { title: "Get Help", url: "/help", icon: IconHelp },
+      { title: "Search", url: "/search", icon: IconSearch },
+    ],
   },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
-}
+
+  GUIDE: {
+    navMain: [
+      { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
+      { title: "My Tours", url: "/guide/my-tours", icon: IconMap },
+      { title: "Create Tour", url: "/guide/create-tour", icon: IconPlus },
+      { title: "Bookings Requests", url: "/guide/bookings", icon: IconCalendar },
+      { title: "My Reviews", url: "/guide/reviews", icon: IconStar },
+      { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
+    ],
+    navSecondary: [
+      { title: "Settings", url: "/guide/settings", icon: IconSettings },
+      { title: "Get Help", url: "/help", icon: IconHelp },
+      { title: "Search", url: "/search", icon: IconSearch },
+    ],
+  },
+
+  TOURIST: {
+    navMain: [
+      { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
+      { title: "Browse Tours", url: "/tours", icon: IconMapSearch },
+      { title: "My Bookings", url: "/tourist/bookings", icon: IconCalendar },
+      { title: "My Reviews", url: "/tourist/reviews", icon: IconStar },
+      { title: "Favorites", url: "/tourist/favourites", icon: IconHeart },
+      { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
+    ],
+    navSecondary: [
+      { title: "Settings", url: "/tourist/settings", icon: IconSettings },
+      { title: "Get Help", url: "/help", icon: IconHelp },
+      { title: "Search", url: "/search", icon: IconSearch },
+    ],
+  },
+};
+
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+ 
+  const [user, setUser] = React.useState<IUser | null>(null)
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await getMyProfile()
+       
+          setUser(res.data || null)
+        
+      } catch (err) {
+        console.error("Failed to fetch user:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchUser()
+  }, [])
+
+ 
+  console.log("from dahsboasrd",user)
+
+  const role = user?.role || "TOURIST"
+
+  const data = navData[role]
+
+
+
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="offcanvas" {...props} className="bg-white shadow-xl shadow-blue-200">
+      <SidebarHeader className="bg-white">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="felx"
             >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
+              <Link href="/" className="col-start-1">
+                <Image src={logo} width={150} height={300} alt="Logo" />
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-white">
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={{
+          name: user?.name as string,
+          email:user?.email as string,
+          profilePic: user?.profilePic as string
+        }} />
       </SidebarFooter>
     </Sidebar>
   )
