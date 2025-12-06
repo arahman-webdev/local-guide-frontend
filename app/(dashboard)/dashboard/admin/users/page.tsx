@@ -29,7 +29,6 @@ export default async function ManageUsersPage() {
         // Add other cookies if needed
         'Content-Type': 'application/json',
       },
-      // credentials: "include" won't work for cross-origin unless CORS is properly set
     })
 
     if (res.status === 401) {

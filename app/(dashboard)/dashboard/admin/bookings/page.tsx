@@ -8,15 +8,17 @@ export default async function BookinPage() {
     const res = await fetch("http://localhost:5000/api/bookings", {
         method: "GET",
         cache: "no-store",
+        headers: {
+            'Cookie': `accessToken=${accessToken}`,
+            // Add other cookies if needed
+            'Content-Type': 'application/json',
+        },
         credentials: "include",
-        headers:{
-            "Cookie":`${accessToken}`
-        }
     })
 
-    // if(!res.ok){
-    //     throw new Error("Failed to fetch bookings")
-    // }
+    if (!res.ok) {
+        throw new Error("Failed to fetch bookings")
+    }
 
     const result = await res.json()
     console.log(result)
