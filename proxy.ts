@@ -1,41 +1,94 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Role-based route protection
+const ROLE_BASED_ROUTES = {
+    ADMIN: [
+        '/dashboard/admin',
+        '/admin',
+    ],
+    GUIDE: [
+        '/guide',
+        '/dashboard/guide',
+    ],
+    TOURIST: [
+        '/tourist',
+        '/dashboard/tourist',
+    ]
+};
 
-export function proxy(request: NextRequest) {
-    const token = request.cookies.get('accessToken')?.value
+export async function proxy(request: NextRequest) {
+    const token = request.cookies.get('accessToken')?.value;
+    const userRole = request.cookies.get('userRole')?.value; // Assuming you store role in cookie
+    const { pathname } = request.nextUrl;
 
-    console.log("token", token)
+    console.log(`Middleware: ${pathname} | Token: ${token ? 'Yes' : 'No'} | Role: ${userRole || 'None'}`);
 
-    const { pathname } = request.nextUrl // /dashboard, /login etc
+    // ALL protected paths (requires any authentication)
+    const protectedPaths = [
+        '/dashboard',
+        '/profile',
+        '/settings',
+        '/appointments',
+        '/admin',
+        '/guide',
+        '/tourist',
+    ];
 
-    const protedPaths = ['/dashboard', '/profile', '/settings', '/appointments']
+    // Authentication routes
+    const authRoutes = [
+        '/login',
+        '/signup',
+        '/register',
+        '/forgot-password',
+    ];
 
-    const isProtectPath = protedPaths.some((path) => pathname.startsWith(path)) // to get single path using some that means map
+    const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
+    const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
-
-
-    const authRoutes = ['/login', '/signup', '/forgot-password'] 
-
-    const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route)) // to get single path using some that means map
-
-
-
-    if (isProtectPath && !token) {
-        return NextResponse.redirect(new URL('/login', request.url))
+    // 1. Check if user is trying to access auth route while logged in
+    if (isAuthRoute && token) {
+        console.log(`Auth route accessed while logged in: ${pathname}`);
+        return NextResponse.redirect(new URL('/', request.url));
     }
 
-
-    if(isAuthRoute && token){
-        return NextResponse.redirect(new URL('/', request.url))
+    // 2. Check if user is trying to access protected route without auth
+    if (isProtectedPath && !token) {
+        console.log(`Protected route accessed without auth: ${pathname}`);
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
     }
 
-    return NextResponse.next()
+    // 3. Optional: Role-based access control
+    if (token && userRole) {
+        // Check if user is trying to access admin routes without admin role
+        if (pathname.startsWith('/dashboard/admin') && userRole !== 'ADMIN') {
+            console.log(`Non-admin trying to access admin route: ${userRole} on ${pathname}`);
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
 
+        // Check if user is trying to access guide routes without guide role
+        if (pathname.startsWith('/guide') && userRole !== 'GUIDE') {
+            console.log(`Non-guide trying to access guide route: ${userRole} on ${pathname}`);
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+
+        // Check if user is trying to access tourist routes without tourist role
+        if (pathname.startsWith('/tourist') && userRole !== 'TOURIST') {
+            console.log(`Non-tourist trying to access tourist route: ${userRole} on ${pathname}`);
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+    }
+
+    return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register', '/forgot-password'],
-}
+    matcher: [
+        // Match all routes except static files
+        '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    ],
+};
 
 // Configuration: role -> allowed route prefixes
 // Keep prefixes minimal ("/admin", "/doctor", "/patient") so subpaths are covered

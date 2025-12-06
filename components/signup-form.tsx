@@ -39,6 +39,7 @@ const formSchema = z.object({
   }),
   email: z.email().min(4, { message: "Email must be at least 4 charecter" }).max(50),
   password: z.string().min(6, { error: "Password must be at least 6 charecter" }),
+  role: z.enum(["TOURIST", "GUIDE"])
   // confirmPassword: z.string().min(6, { error: "Confirm Password must be at least 6 charecter" }),
 
 })
@@ -61,7 +62,7 @@ export function RegisterForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name:"",
+      name: "",
       email: "",
       password: "",
 
@@ -77,7 +78,7 @@ export function RegisterForm({
         headers: {
           "Content-Type": "application/json",
         },
-        
+
         body: JSON.stringify(data),
         cache: "no-store",
       });
@@ -95,7 +96,7 @@ export function RegisterForm({
       }
     } catch (error: any) {
       console.log(error);
-      toast.error("Failed to log in user");
+      toast.error("Failed to register in user");
     }
   };
 
@@ -174,7 +175,28 @@ export function RegisterForm({
                     </FormItem>
                   )}
                 /> */}
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl className="w-full rounded-none p-5">
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a role to display" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="TOURIST">TOURIST</SelectItem>
+                          <SelectItem value="GUIDE">GUIDE</SelectItem>
 
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <Button
                   type="submit"

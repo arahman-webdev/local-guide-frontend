@@ -74,7 +74,11 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
         body: JSON.stringify({ status: newStatus }),
       });
 
+      
+
       const data = await res.json();
+
+      
 
       if (!res.ok || !data.success) {
         toast.error(data.message || "Failed to update status");
@@ -154,7 +158,7 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
                   </span>
                 </TableCell>
 
-                <TableCell className="text-right">
+                <TableCell className="flex justify-end">
                   <Select
                     onValueChange={(value) => handleStatusSelect(user.id, user.name, value)}
                   >

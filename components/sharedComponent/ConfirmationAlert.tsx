@@ -11,11 +11,22 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 
-export function ConfirmationAlert() {
+
+interface IProps {
+  children: React.ReactNode
+  onConfirm: () => Promise<void>;
+}
+
+export function ConfirmationAlert({onConfirm, children}:IProps) {
+  const handleConfirm = ()=>{
+    onConfirm()
+  }
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline">Show Dialog</Button>
+        <Button variant="ghost">
+          {children}
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -27,7 +38,7 @@ export function ConfirmationAlert() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={handleConfirm} >Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
