@@ -1,3 +1,4 @@
+import ManageBooking from "@/components/Admin/ManageBooking"
 import { cookies } from "next/headers"
 
 
@@ -22,7 +23,13 @@ export default async function BookinPage() {
 
     const result = await res.json()
     console.log(result)
+
+    const data = result?.data 
+
+
     return (
-        <div>BookinPage</div>
+        <div>
+            <ManageBooking bookings={data} />
+        </div>
     )
 }

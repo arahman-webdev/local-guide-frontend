@@ -24,7 +24,7 @@ export function ConfirmationAlert({onConfirm, children}:IProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost">
+        <Button variant="ghost" className="hover:bg-red-100 cursor-pointer">
           {children}
         </Button>
       </AlertDialogTrigger>
