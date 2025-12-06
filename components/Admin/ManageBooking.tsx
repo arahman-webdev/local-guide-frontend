@@ -1,7 +1,7 @@
 "use client";
 
 import { IconUsers } from "@tabler/icons-react";
-import React from "react";
+import React, { useState } from "react";
 import {
     Table,
     TableBody,
@@ -13,11 +13,33 @@ import {
 import Image from "next/image";
 import { Eye, Trash2 } from "lucide-react";
 import { ConfirmationAlert } from "../sharedComponent/ConfirmationAlert";
+import { useRouter } from "next/navigation";
 
 export default function ManageBooking({ bookings }: { bookings: any[] }) {
+    const router = useRouter()
+ const [loadingId, setLoadingId] = useState<string | null>(null);
 
 
 
+      //  Handle Delete
+  const handleDelete = async (id: string) => {
+    try {
+      setLoadingId(id);
+
+      const res = await fetch(`http://localhost:5000/api/bookings/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      console.log("Deleted:", data);
+      router.refresh();
+    } catch (error) {
+      console.error("Delete Error:", error);
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
     return (
         <div>
@@ -129,8 +151,8 @@ export default function ManageBooking({ bookings }: { bookings: any[] }) {
                                 <TableCell>
                                     <span
                                         className={`
-    px-3 py-1 rounded-full text-xs font-medium
-    ${booking.status === "COMPLETED"
+                                            px-3 py-1 rounded-full text-xs font-medium
+                                            ${booking.status === "COMPLETED"
                                                 ? "bg-green-100 text-green-700"
                                                 : booking.status === "CONFIRMED"
                                                     ? "bg-blue-100 text-blue-700"
@@ -156,7 +178,7 @@ export default function ManageBooking({ bookings }: { bookings: any[] }) {
 
                                     {/* Delete */}
                                     <ConfirmationAlert
-                                        onConfirm={() => console.log("Delete booking", booking.id)}
+                                        onConfirm={() => handleDelete(booking?.id)}
                                     >
                                         <Trash2 size={18} className="text-red-600 hover:bg-blue-400 cursor-pointer" />
                                     </ConfirmationAlert>
