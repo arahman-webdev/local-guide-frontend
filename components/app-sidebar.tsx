@@ -56,10 +56,10 @@ const navData = {
   GUIDE: {
     navMain: [
       { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
-      { title: "My Tours", url: "/guide/my-tours", icon: IconMap },
-      { title: "Create Tour", url: "/guide/create-tour", icon: IconPlus },
-      { title: "Bookings Requests", url: "/guide/bookings", icon: IconCalendar },
-      { title: "My Reviews", url: "/guide/reviews", icon: IconStar },
+      { title: "My Tours", url: "/dashboard/guide/my-tours", icon: IconMap },
+      { title: "Create Tour", url: "/dashboard/guide/create-tour", icon: IconPlus },
+      { title: "Bookings Requests", url: "/dashboard/guide/bookings", icon: IconCalendar },
+      { title: "My Reviews", url: "/dashboard/guide/reviews", icon: IconStar },
       { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
     ],
     navSecondary: [
