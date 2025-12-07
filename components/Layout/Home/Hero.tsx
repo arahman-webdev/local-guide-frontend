@@ -23,14 +23,16 @@ export default function Hero() {
 
                 {/* Search Bar */}
                 <div className="bg-white rounded-full shadow-xl p-3 flex items-center gap-3 max-w-xl mx-auto border border-white/30">
-                    <Search className="text-gray-500" />
-                    <input
-                        placeholder="Where are you going?"
-                        className="flex-1 outline-none text-gray-700 text-base"
-                    />
-                    <Button className="rounded-full px-6 bg-blue-600 hover:bg-blue-700">
-                        Search
-                    </Button>
+                    <>
+                        <Search className="text-gray-500" />
+                        <input
+                            placeholder="Where are you going?"
+                            className="flex-1 outline-none text-gray-700 text-base"
+                        />
+                        <Button className="rounded-full px-6 bg-blue-600 hover:bg-blue-700">
+                            Search
+                        </Button>
+                    </>
                 </div>
 
                 {/* CTA */}
