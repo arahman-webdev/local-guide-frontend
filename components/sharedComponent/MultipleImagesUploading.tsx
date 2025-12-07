@@ -26,7 +26,7 @@ export default function ImageUpload({ onFilesChange }: ImageUploadProps) {
       getInputProps,
     },
   ] = useFileUpload({
-    accept: "image/svg+xml,image/png,image/jpeg,image/jpg,image/gif,image/webp",
+    accept: "image/svg+xml,image/png,image/jpeg,image/jpg,image/gif,image/webp, image/avif",
     maxSize,
     multiple: true,
     maxFiles,
@@ -75,13 +75,13 @@ export default function ImageUpload({ onFilesChange }: ImageUploadProps) {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
               {files.map((file) => (
-                <div key={file.id} className="relative aspect-square rounded-md bg-accent">
+                <div key={file.id} className="relative  rounded-md">
                   <img
                     src={file.preview}
                     alt={file.file.name}
-                    className="size-full rounded-[inherit] object-cover"
+                    className="w-52 h-52  object-cover"
                   />
 
                   <Button
@@ -106,7 +106,7 @@ export default function ImageUpload({ onFilesChange }: ImageUploadProps) {
             </div>
             <p className="mb-1.5 text-sm font-medium">Drop your images here</p>
             <p className="text-xs text-muted-foreground">
-              SVG, PNG, JPG, GIF, WEBP (max {maxSizeMB}MB)
+              SVG, PNG, JPG, GIF, WEBP, AVIF (max {maxSizeMB}MB)
             </p>
 
             <Button type="button" variant="outline" className="mt-4" onClick={openFileDialog}>

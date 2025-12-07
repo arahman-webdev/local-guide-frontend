@@ -44,7 +44,7 @@ export default function ManageTourListingTable({ tours }: { tours: any[] }) {
     }
   };
 
-  // 🔴 Handle Delete
+  //  Handle Delete
   const handleDelete = async (id: string) => {
     try {
       setLoadingId(id);

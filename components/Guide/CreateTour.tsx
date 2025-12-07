@@ -123,100 +123,112 @@ export default function CreateTour() {
         {/* Title */}
         <Input
           {...register("title")}
-          placeholder="Sundarbans Wildlife Adventure"
+          placeholder="Title: Sundarbans Wildlife Adventure"
           className="border-purple-400 focus:border-purple-600"
         />
         {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
 
         {/* Description */}
-        <Textarea
-          {...register("description")}
-          rows={4}
-          placeholder="Detailed description..."
-          className="border-purple-400 focus:border-purple-600"
-        />
-        {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+        <div className="flex gap-4">
+          <Textarea
+            {...register("description")}
+            rows={4}
+            cols={8}
+            placeholder="Detailed description..."
+            className="border-purple-400 focus:border-purple-600"
+          />
+          {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
 
-        {/* Itinerary */}
-        <Textarea
-          {...register("itinerary")}
-          rows={4}
-          placeholder="Itinerary"
-          className="border-purple-400 focus:border-purple-600"
-        />
+          {/* Itinerary */}
+          <Textarea
+            {...register("itinerary")}
+            rows={4}
+            cols={8}
+            placeholder="Itinerary"
+            className="border-purple-400 focus:border-purple-600"
+          />
+        </div>
 
-        {/* Fee */}
-        <Input
-          type="number"
-          {...register("fee")}
-          placeholder="2500"
-          className="border-purple-400 focus:border-purple-600"
-        />
+        <div className="flex gap-4">
+          {/* Fee */}
+          <Input
+            type="number"
+            {...register("fee")}
+            placeholder="Fee: 2500"
+            className="border-purple-400 focus:border-purple-600"
+          />
 
-        {/* Duration (STRING) */}
-        <Input
-          {...register("duration")}
-          placeholder="5 Hours"
-          className="border-purple-400 focus:border-purple-600"
-        />
+          {/* Duration (STRING) */}
+          <Input
+            {...register("duration")}
+            placeholder="Duration: 5 Hours or days"
+            className="border-purple-400 focus:border-purple-600"
+          />
+        </div>
 
-        {/* Meeting Point */}
-        <Input
-          {...register("meetingPoint")}
-          placeholder="Bandarban Bus Station"
-          className="border-purple-400 focus:border-purple-600"
-        />
+
 
         {/* Group Size */}
         <div className="grid grid-cols-2 gap-4">
           <Input
             {...register("maxGroupSize")}
-            placeholder="20"
+            placeholder="Max Group size: 20"
             type="number"
             className="border-purple-400 focus:border-purple-600"
           />
 
           <Input
             {...register("minGroupSize")}
-            placeholder="1"
+            placeholder="Min Group Size: 1"
             type="number"
             className="border-purple-400 focus:border-purple-600"
           />
         </div>
 
-        {/* Category */}
-        <Select onValueChange={(v) => form.setValue("category", v)}>
-          <SelectTrigger className="border-purple-400">
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
+        <div className="flex gap-4">
+          {/* Meeting Point */}
+          <Input
+            {...register("meetingPoint")}
+            placeholder="Meeting Point: Bandarban Bus Station"
+            className="border-purple-400 focus:border-purple-600"
+          />
 
-          <SelectContent>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
+          {/* Category */}
+          <Select onValueChange={(v) => form.setValue("category", v)}>
+            <SelectTrigger className="border-purple-400 w-full">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
+        </div>
+
+
 
         {/* Language / City / Country */}
         <div className="grid grid-cols-3 gap-4">
           <Input
             {...register("language")}
-            placeholder="English, Bangla"
+            placeholder="Language: English, Bangla"
             className="border-purple-400 focus:border-purple-600"
           />
 
           <Input
             {...register("city")}
-            placeholder="Cox's Bazar"
+            placeholder="City: Cox's Bazar"
             className="border-purple-400 focus:border-purple-600"
           />
 
           <Input
             {...register("country")}
-            placeholder="Bangladesh"
+            placeholder="Country: Bangladesh"
             className="border-purple-400 focus:border-purple-600"
           />
         </div>
@@ -224,7 +236,7 @@ export default function CreateTour() {
         {/* Tags */}
         <Input
           {...register("tags")}
-          placeholder="adventure, sea, nature"
+          placeholder="Tags: adventure, sea, nature"
           className="border-purple-400 focus:border-purple-600"
         />
 
