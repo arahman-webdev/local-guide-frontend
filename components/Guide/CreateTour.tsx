@@ -62,49 +62,58 @@ export default function CreateTour() {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof tourSchema>) => {
-    try {
-      setLoading(true);
+const onSubmit = async (values: z.infer<typeof tourSchema>) => {
+  try {
+    setLoading(true);
 
-      // Convert fields to backend format
-      const payload = {
-        ...values,
-        fee: Number(values.fee),
-        maxGroupSize: Number(values.maxGroupSize),
-        minGroupSize: Number(values.minGroupSize),
-        language: values.language.split(",").map((l) => l.trim()),
-        tags: values.tags ? values.tags.split(",").map((t) => t.trim()) : [],
-      };
+    // Convert language string into array of objects
+    const tourLanguages = values.language
+      .split(",")
+      .map((l) => ({ name: l.trim() }));
 
-      const formData = new FormData();
-      formData.append("data", JSON.stringify(payload));
+    // Convert tags string into array
+    const tags = values.tags ? values.tags.split(",").map((t) => t.trim()) : [];
 
-      images.forEach((img) => {
-        formData.append("images", img);
-      });
+    // Build payload to match backend
+    const payload = {
+      ...values,
+      fee: Number(values.fee),
+      maxGroupSize: Number(values.maxGroupSize),
+      minGroupSize: Number(values.minGroupSize),
+      tourLanguages, // send languages as array of objects
+      tags,
+    };
 
-      const res = await fetch("http://localhost:5000/api/tour", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(payload));
 
-      const result = await res.json();
+    // Append images
+    images.forEach((img) => formData.append("images", img));
 
-      if (!res.ok) {
-        toast.error(result.message || "Backend validation error");
-        return;
-      }
+    const res = await fetch("http://localhost:5000/api/tour", {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
 
-      toast.success("Tour created successfully!");
-      setImages([]);
+    const result = await res.json();
 
-    } catch (err) {
-      toast.error("Something went wrong.");
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      toast.error(result.message || "Backend validation error");
+      return;
     }
-  };
+
+    toast.success("Tour created successfully!");
+    setImages([]);
+    form.reset(); // reset form
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const {
     register,

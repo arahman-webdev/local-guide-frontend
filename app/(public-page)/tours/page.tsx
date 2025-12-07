@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function TourPage() {
   return (
-    <div>
+    <div className='py-20'>
         <ExploreTour />
     </div>
   )

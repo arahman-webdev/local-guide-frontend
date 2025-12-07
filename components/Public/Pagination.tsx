@@ -1,84 +1,81 @@
-import { usePagination } from "@/hooks/use-pagination";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 
-type PaginationProps = {
+'use client';
+
+import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  paginationItemsToDisplay?: number;
-};
+  onPageChange: (page: number) => void;
+}
 
-export default function Component({
-  currentPage,
-  totalPages,
-  paginationItemsToDisplay = 5,
-}: PaginationProps) {
-  const { pages, showLeftEllipsis, showRightEllipsis } = usePagination({
-    currentPage,
-    paginationItemsToDisplay,
-    totalPages,
-  });
+export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      let start = Math.max(1, currentPage - 2);
+      let end = Math.min(totalPages, start + maxVisible - 1);
+      
+      if (end - start < maxVisible - 1) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+      
+      for (let i = start; i <= end; i++) pages.push(i);
+    }
+    
+    return pages;
+  };
 
   return (
-    <Pagination>
-      <PaginationContent>
-        {/* Previous page button */}
-        <PaginationItem>
-          <PaginationPrevious
-            aria-disabled={currentPage === 1 ? true : undefined}
-            className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-            href={currentPage === 1 ? undefined : `#/page/${currentPage - 1}`}
-            role={currentPage === 1 ? "link" : undefined}
-          />
-        </PaginationItem>
-
-        {/* Left ellipsis (...) */}
-        {showLeftEllipsis && (
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-        )}
-
-        {/* Page number links */}
-        {pages.map((page) => (
-          <PaginationItem key={page}>
-            <PaginationLink
-              href={`#/page/${page}`}
-              isActive={page === currentPage}
-            >
-              {page}
-            </PaginationLink>
-          </PaginationItem>
-        ))}
-
-        {/* Right ellipsis (...) */}
-        {showRightEllipsis && (
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-        )}
-
-        {/* Next page button */}
-        <PaginationItem>
-          <PaginationNext
-            aria-disabled={currentPage === totalPages ? true : undefined}
-            className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-            href={
-              currentPage === totalPages
-                ? undefined
-                : `#/page/${currentPage + 1}`
-            }
-            role={currentPage === totalPages ? "link" : undefined}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+    <div className="flex items-center justify-center gap-2">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`flex items-center justify-center w-10 h-10 rounded-lg ${
+          currentPage === 1
+            ? 'text-gray-400 cursor-not-allowed'
+            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+        }`}
+      >
+        <ChevronLeft size={20} />
+      </button>
+      
+      {getPageNumbers().map((page) => (
+        <button
+          key={page}
+          onClick={() => onPageChange(page)}
+          className={`w-10 h-10 rounded-lg font-medium ${
+            currentPage === page
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+          }`}
+        >
+          {page}
+        </button>
+      ))}
+      
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`flex items-center justify-center w-10 h-10 rounded-lg ${
+          currentPage === totalPages
+            ? 'text-gray-400 cursor-not-allowed'
+            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+        }`}
+      >
+        <ChevronRight size={20} />
+      </button>
+      
+      {totalPages > 5 && (
+        <span className="ml-2 text-gray-600">
+          Page {currentPage} of {totalPages}
+        </span>
+      )}
+    </div>
   );
 }
