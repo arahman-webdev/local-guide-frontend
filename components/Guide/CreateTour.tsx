@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+
 import {
   Select,
   SelectTrigger,
@@ -17,8 +17,10 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+
 import ImageUpload from "../sharedComponent/MultipleImagesUploading";
 
+// PRISMA ENUM
 const categories = [
   "FOOD",
   "ART",
@@ -32,24 +34,22 @@ const categories = [
   "OTHER",
 ];
 
-
-
+// ⭐ ZOD SCHEMA EXACT WITH BACKEND
 export const tourSchema = z.object({
-  title: z.string().min(3, "Title is too short"),
+  title: z.string().min(3, "Title required"),
   description: z.string().min(10, "Description is too short"),
-  itinerary: z.string().min(10),
+  itinerary: z.string().min(10, "Itinerary is required"),
   fee: z.string().min(1),
-  duration: z.string().min(1),
+  duration: z.string().min(1, "Duration required"), // STRING per backend
   meetingPoint: z.string().min(2),
   maxGroupSize: z.string().min(1),
   minGroupSize: z.string().min(1),
   category: z.string().min(1),
-  language: z.string().min(1),
+  language: z.string().min(1), // comma separated → array
   city: z.string().min(1),
   country: z.string().min(1),
-  tags: z.string().optional(),
+  tags: z.string().optional(), // comma separated → array
 });
-
 
 export default function CreateTour() {
   const [images, setImages] = useState<File[]>([]);
@@ -66,9 +66,18 @@ export default function CreateTour() {
     try {
       setLoading(true);
 
-      // 👉 Must be FormData for multer  
+      // Convert fields to backend format
+      const payload = {
+        ...values,
+        fee: Number(values.fee),
+        maxGroupSize: Number(values.maxGroupSize),
+        minGroupSize: Number(values.minGroupSize),
+        language: values.language.split(",").map((l) => l.trim()),
+        tags: values.tags ? values.tags.split(",").map((t) => t.trim()) : [],
+      };
+
       const formData = new FormData();
-      formData.append("data", JSON.stringify(values));
+      formData.append("data", JSON.stringify(payload));
 
       images.forEach((img) => {
         formData.append("images", img);
@@ -82,14 +91,12 @@ export default function CreateTour() {
 
       const result = await res.json();
 
-      // Backend validation errors
       if (!res.ok) {
-        toast.error(result.message || "Validation error");
+        toast.error(result.message || "Backend validation error");
         return;
       }
 
       toast.success("Tour created successfully!");
-      form.reset();
       setImages([]);
 
     } catch (err) {
@@ -106,7 +113,7 @@ export default function CreateTour() {
   } = form;
 
   return (
-    <div className="bg-white shadow-md rounded-xl p-8 border border-blue-200">
+    <div className="bg-white shadow-md rounded-xl p-8 border border-purple-300">
       <h1 className="text-2xl font-bold text-purple-700 mb-6">
         Create New Tour
       </h1>
@@ -114,139 +121,114 @@ export default function CreateTour() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
         {/* Title */}
-        <div>
-          <Input
-            {...register("title")}
-            placeholder="Hidden Jazz Bars of New Orleans"
-            className="border-purple-300 focus:border-purple-500"
-          />
-          {errors.title && (
-            <p className="text-red-500 text-sm">{errors.title.message}</p>
-          )}
-        </div>
+        <Input
+          {...register("title")}
+          placeholder="Sundarbans Wildlife Adventure"
+          className="border-purple-400 focus:border-purple-600"
+        />
+        {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
 
         {/* Description */}
-        <div>
-          <Textarea
-            {...register("description")}
-            rows={4}
-            placeholder="Detailed description..."
-            className="border-purple-300 focus:border-purple-500"
-          />
-          {errors.description && (
-            <p className="text-red-500 text-sm">{errors.description.message}</p>
-          )}
-        </div>
+        <Textarea
+          {...register("description")}
+          rows={4}
+          placeholder="Detailed description..."
+          className="border-purple-400 focus:border-purple-600"
+        />
+        {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
 
         {/* Itinerary */}
-        <div>
-          <Textarea
-            {...register("itinerary")}
-            rows={4}
-            placeholder="Itinerary"
-            className="border-purple-300 focus:border-purple-500"
-          />
-        </div>
+        <Textarea
+          {...register("itinerary")}
+          rows={4}
+          placeholder="Itinerary"
+          className="border-purple-400 focus:border-purple-600"
+        />
 
         {/* Fee */}
-        <div>
-          <Input
-            type="number"
-            {...register("fee")}
-            placeholder="99"
-            className="border-purple-300 focus:border-purple-500"
-          />
-        </div>
+        <Input
+          type="number"
+          {...register("fee")}
+          placeholder="2500"
+          className="border-purple-400 focus:border-purple-600"
+        />
 
-        {/* Duration */}
-        <div>
-          <Input
-            type="number"
-            {...register("duration")}
-            placeholder="Duration in hours"
-            className="border-purple-300 focus:border-purple-500"
-          />
-        </div>
+        {/* Duration (STRING) */}
+        <Input
+          {...register("duration")}
+          placeholder="5 Hours"
+          className="border-purple-400 focus:border-purple-600"
+        />
 
         {/* Meeting Point */}
-        <div>
-          <Input
-            {...register("meetingPoint")}
-            placeholder="Downtown Manhattan"
-            className="border-purple-300 focus:border-purple-500"
-          />
-        </div>
+        <Input
+          {...register("meetingPoint")}
+          placeholder="Bandarban Bus Station"
+          className="border-purple-400 focus:border-purple-600"
+        />
 
-        {/* Group size */}
+        {/* Group Size */}
         <div className="grid grid-cols-2 gap-4">
           <Input
             {...register("maxGroupSize")}
-            placeholder="Max group"
+            placeholder="20"
             type="number"
-            className="border-purple-300 focus:border-purple-500"
+            className="border-purple-400 focus:border-purple-600"
           />
 
           <Input
             {...register("minGroupSize")}
+            placeholder="1"
             type="number"
-            className="border-purple-300 focus:border-purple-500"
+            className="border-purple-400 focus:border-purple-600"
           />
         </div>
 
         {/* Category */}
-        <div>
-          <Select
-            onValueChange={(v) => form.setValue("category", v)}
-          >
-            <SelectTrigger className="border-purple-300">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
+        <Select onValueChange={(v) => form.setValue("category", v)}>
+          <SelectTrigger className="border-purple-400">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
 
-            <SelectContent>
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SelectContent>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
 
-          {errors.category && (
-            <p className="text-red-500 text-sm">{errors.category.message}</p>
-          )}
-        </div>
-
-        {/* Language / city / country */}
+        {/* Language / City / Country */}
         <div className="grid grid-cols-3 gap-4">
           <Input
             {...register("language")}
-            placeholder="English"
-            className="border-purple-300 focus:border-purple-500"
+            placeholder="English, Bangla"
+            className="border-purple-400 focus:border-purple-600"
           />
 
           <Input
             {...register("city")}
-            placeholder="Paris"
-            className="border-purple-300 focus:border-purple-500"
+            placeholder="Cox's Bazar"
+            className="border-purple-400 focus:border-purple-600"
           />
 
           <Input
             {...register("country")}
-            placeholder="France"
-            className="border-purple-300 focus:border-purple-500"
+            placeholder="Bangladesh"
+            className="border-purple-400 focus:border-purple-600"
           />
         </div>
 
         {/* Tags */}
-        <div>
-          <Input
-            {...register("tags")}
-            placeholder="music, nightlife"
-            className="border-purple-300 focus:border-purple-500"
-          />
-        </div>
+        <Input
+          {...register("tags")}
+          placeholder="adventure, sea, nature"
+          className="border-purple-400 focus:border-purple-600"
+        />
 
-        {/* Images */}
+        {/* Images Upload */}
         <div>
           <label className="text-sm font-medium text-purple-700 mb-2 block">
             Upload Images
