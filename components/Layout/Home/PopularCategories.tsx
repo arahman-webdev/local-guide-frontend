@@ -7,17 +7,20 @@ import Image from "next/image";
 // Imported local images
 import art from "@/app/images/art.png";
 import food from "@/app/images/food.png";
+import { useRouter } from "next/navigation";
 
 const categories = [
-  { name: "Food", image: food },
-  { name: "Art", image: art },
-  { name: "Adventure", image: "/images/categories/adventure.jpg" },
-  { name: "History", image: "/images/categories/history.jpg" },
-  { name: "Nightlife", image: "/images/categories/nightlife.jpg" },
-  { name: "Shopping", image: "/images/categories/shopping.jpg" },
-  { name: "Heritage", image: "/images/categories/heritage.jpg" },
+  { name: "FOOD", image: food },
+  { name: "ART", image: art },
+  { name: "ADVENTURE", image: "/images/categories/adventure.jpg" },
+  { name: "HISTORY", image: "/images/categories/history.jpg" },
+  { name: "NIGHTLIFE", image: "/images/categories/nightlife.jpg" },
+  { name: "SHOOPPING", image: "/images/categories/shopping.jpg" },
+  { name: "HERITAGE", image: "/images/categories/heritage.jpg" },
   { name: "Other", image: "/images/categories/other.jpg" },
 ];
+
+
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -28,7 +31,12 @@ const cardVariants = {
   }),
 };
 
+
+
+
 export default function PopularCategories() {
+
+  const router = useRouter()
   return (
     <section className="py-20">
       <div className="max-w-7xl mx-auto px-4">
@@ -41,6 +49,8 @@ export default function PopularCategories() {
           Popular Categories
         </h2>
 
+  
+
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {categories.map((cat, i) => (
             <motion.div
@@ -50,6 +60,7 @@ export default function PopularCategories() {
               whileInView="visible"
               viewport={{ once: true }}
               variants={cardVariants}
+              onClick={()=>router.push(`/tours?category=${cat.name}`)}
               className="
                 group relative rounded-xl overflow-hidden shadow-md cursor-pointer
                 hover:shadow-xl transition-all duration-500
