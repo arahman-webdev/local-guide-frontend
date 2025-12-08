@@ -31,6 +31,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 interface TourDetail {
     id: string;
@@ -170,28 +171,200 @@ export default function TourDetail() {
     const availableDates = getAvailableDates();
 
     // Handle booking request
-    const handleBookingRequest = async () => {
-        if (!selectedDate || !selectedTime) {
-            alert('Please select date and time');
+
+
+
+const handleBookingRequest = async () => {
+    try {
+       
+        if (!selectedDate) {
+            toast.error('Please select a date');
+            return;
+        }
+        
+        if (!selectedTime) {
+            toast.error('Please select a time');
             return;
         }
 
-        try {
-            const bookingData = {
-                tourId: tour?.id,
-                date: selectedDate,
-                time: selectedTime,
-                participants,
-                totalPrice: tour ? tour.fee * participants : 0
-            };
-
-            // Implement booking API call here
-            console.log('Booking request:', bookingData);
-            alert('Booking request sent successfully!');
-        } catch (error) {
-            console.error('Booking error:', error);
-            alert('Failed to send booking request');
+        if (!tour?.id) {
+            toast.error('No tour selected');
+            return;
         }
+
+        // Show loading toast
+        const loadingToast = toast.loading('Creating your booking...');
+
+        
+        const convertTimeTo24Hour = (time12h: string) => {
+            try {
+                if (!time12h) return null;
+                
+                // If already in 24-hour format (no AM/PM)
+                if (!time12h.includes('AM') && !time12h.includes('PM')) {
+                    return time12h;
+                }
+                
+                const [time, modifier] = time12h.split(' ');
+                let [hours, minutes] = time.split(':');
+                
+                if (modifier === 'PM' && hours !== '12') {
+                    hours = String(parseInt(hours, 10) + 12);
+                }
+                if (modifier === 'AM' && hours === '12') {
+                    hours = '00';
+                }
+                
+                return `${hours.padStart(2, '0')}:${minutes}`;
+            } catch (error) {
+                console.error('Time conversion error:', error);
+                return null;
+            }
+        };
+
+        const time24h = convertTimeTo24Hour(selectedTime);
+        if (!time24h) {
+            toast.dismiss(loadingToast);
+            toast.error('Invalid time format selected');
+            return;
+        }
+
+        // Debug log
+        console.log('Selected values:', {
+            selectedDate,
+            selectedTime,
+            time24h
+        });
+
+        // Create ISO string with proper error handling
+        let startTimeISO: string;
+        let endTimeISO: string;
+        
+        try {
+            // Combine date and time
+            const dateTimeString = `${selectedDate}T${time24h}:00`;
+            const startTime = new Date(dateTimeString);
+            
+            // Validate the date
+            if (isNaN(startTime.getTime())) {
+                throw new Error('Invalid date/time combination');
+            }
+            
+            startTimeISO = startTime.toISOString();
+            
+            // Calculate end time (default 3 hours or use tour duration)
+            const durationHours = typeof tour.duration === 'string' 
+                ? parseInt(tour.duration.split(' ')[0]) || 3 
+                : (tour.duration || 3);
+            
+            const endTime = new Date(startTime.getTime() + (durationHours * 60 * 60 * 1000));
+            endTimeISO = endTime.toISOString();
+            
+            console.log('Generated ISO times:', {
+                startTimeISO,
+                endTimeISO
+            });
+        } catch (dateError) {
+            toast.dismiss(loadingToast);
+            toast.error('Invalid date/time selected');
+            console.error('Date creation error:', dateError);
+            return;
+        }
+
+        const bookingData = {
+            tourId: tour.id,
+            startTime: startTimeISO,
+            endTime: endTimeISO,
+            paymentMethod: "ssl"
+        };
+
+        console.log('Sending booking data:', bookingData);
+
+
+
+        const response = await fetch('http://localhost:5000/api/bookings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+               
+            },
+            credentials: "include",
+            body: JSON.stringify(bookingData)
+        });
+
+        const result = await response.json();
+        
+        // Dismiss loading toast
+        toast.dismiss(loadingToast);
+
+        console.log('Booking response:', result);
+
+        if (!response.ok) {
+            throw new Error(result.message || `Booking failed with status: ${response.status}`);
+        }
+
+        // Handle success response
+        if (result.success && result.data) {
+            if (result.data.paymentUrl) {
+                // Success with payment URL
+                toast.success('Booking Created!', {
+                    description: `Booking Code: ${result.data.booking?.bookingCode || 'N/A'}`,
+                    duration: 3000,
+                });
+
+                // Redirect to payment after delay
+                setTimeout(() => {
+                    window.location.href = result.data.paymentUrl;
+                }, 2000);
+            } else {
+                // Success without payment (free tour maybe)
+                toast.success('Booking Confirmed!', {
+                    description: `Booking Code: ${result.data.booking?.bookingCode || 'Success'}`,
+                    action: result.data.booking?.id ? {
+                        label: 'View Details',
+                        onClick: () => window.location.href = `/bookings/${result.data.booking.id}`
+                    } : undefined
+                });
+
+                // Reset form
+                setSelectedDate('');
+                setSelectedTime('');
+                setParticipants(1);
+            }
+        } else {
+            throw new Error(result.message || 'Unknown error occurred');
+        }
+
+    } catch (error: any) {
+        console.error('Booking error:', error);
+        
+        // Check if it's the RangeError from toISOString
+        if (error.name === 'RangeError' || error.message.includes('Invalid time')) {
+            toast.error('Invalid Date/Time', {
+                description: 'Please select a valid date and time combination'
+            });
+        } else {
+            toast.error('Booking Failed', {
+                description: error.message || 'Please try again',
+                action: {
+                    label: 'Retry',
+                    onClick: () => handleBookingRequest()
+                }
+            });
+        }
+    }
+};
+    // Helper function to calculate end time (add tour duration)
+    const getEndTime = (startTime: string) => {
+        if (!tour?.duration) return '18:00'; // Default end time
+
+        const [hours, minutes] = startTime.split(':').map(Number);
+        const totalMinutes = hours * 60 + minutes + tour.duration;
+
+        const endHours = Math.floor(totalMinutes / 60);
+        const endMinutes = totalMinutes % 60;
+
+        return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
     };
 
     if (loading) {
@@ -257,8 +430,8 @@ export default function TourDetail() {
                                             key={index}
                                             onClick={() => setActiveImageIndex(index)}
                                             className={`w-2 h-2 rounded-full transition-all ${activeImageIndex === index
-                                                    ? 'bg-white w-8'
-                                                    : 'bg-white/50 hover:bg-white/80'
+                                                ? 'bg-white w-8'
+                                                : 'bg-white/50 hover:bg-white/80'
                                                 }`}
                                         />
                                     ))}
@@ -374,8 +547,8 @@ export default function TourDetail() {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id as any)}
                                         className={`py-4 px-1 border-b-2 font-medium text-sm transition-all ${activeTab === tab.id
-                                                ? 'border-blue-500 text-blue-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                     >
                                         {tab.label}
@@ -487,8 +660,8 @@ export default function TourDetail() {
                                                         <Star
                                                             key={i}
                                                             className={`h-5 w-5 ${i < Math.floor(tour.rating || 4.8)
-                                                                    ? 'fill-yellow-400 text-yellow-400'
-                                                                    : 'text-gray-300'
+                                                                ? 'fill-yellow-400 text-yellow-400'
+                                                                : 'text-gray-300'
                                                                 }`}
                                                         />
                                                     ))}
@@ -544,8 +717,8 @@ export default function TourDetail() {
                                                                 <Star
                                                                     key={i}
                                                                     className={`h-4 w-4 ${i < review.rating
-                                                                            ? 'fill-yellow-400 text-yellow-400'
-                                                                            : 'text-gray-300'
+                                                                        ? 'fill-yellow-400 text-yellow-400'
+                                                                        : 'text-gray-300'
                                                                         }`}
                                                                 />
                                                             ))}
@@ -738,8 +911,8 @@ export default function TourDetail() {
                                                     key={date}
                                                     onClick={() => setSelectedDate(date)}
                                                     className={`p-3 rounded-lg border transition-all ${selectedDate === date
-                                                            ? 'border-blue-500 bg-blue-50 text-blue-600 font-medium'
-                                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                        ? 'border-blue-500 bg-blue-50 text-blue-600 font-medium'
+                                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                                         }`}
                                                 >
                                                     <div className="text-sm">
@@ -765,8 +938,8 @@ export default function TourDetail() {
                                                     key={time}
                                                     onClick={() => setSelectedTime(time)}
                                                     className={`p-3 rounded-lg border transition-all ${selectedTime === time
-                                                            ? 'border-blue-500 bg-blue-50 text-blue-600 font-medium'
-                                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                        ? 'border-blue-500 bg-blue-50 text-blue-600 font-medium'
+                                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                                         }`}
                                                 >
                                                     {time}

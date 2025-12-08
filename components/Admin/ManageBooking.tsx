@@ -136,7 +136,7 @@ export default function ManageBooking({ bookings }: { bookings: any[] }) {
 
                                 {/* 👉 Payment */}
                                 <TableCell>
-                                    {booking.payment ? (
+                                    {booking.payment?.status === "COMPLETED" ? (
                                         <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">
                                             PAID
                                         </span>

@@ -18,10 +18,10 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden">
+    <footer className="relative overflow-hidden bg-linear-to-br from-blue-600/20 via-cyan-600/10 to-purple-900/20">
       {/* Background linear */}
-      <div className="absolute inset-0 bg-linear-to-br from-blue-600/20 via-cyan-600/10 to-purple-900/20"></div>
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
+      {/* <div className="absolute inset-0 "></div>
+      <div className="absolute inset-0 bg-[url('/https://i.ibb.co.com/4R4QVL3n/login.jpg')] opacity-15"></div> */}
       
       {/* Main Content */}
       <div className="relative max-w-7xl mx-auto px-4 py-16 lg:py-20">
