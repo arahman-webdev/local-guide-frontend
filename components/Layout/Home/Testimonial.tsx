@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight, Quote, Sparkles, Award } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 // Demo Data
 const testimonials = [
@@ -317,11 +316,9 @@ export default function Testimonial() {
               Join thousands of travelers who have discovered the authentic beauty of Bangladesh with local experts.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             <Link href={'/tours'}>
               <Button className="px-8 py-6 rounded-xl text-lg font-semibold bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300">
                 Browse All Tours
               </Button>
-             </Link>
               <Button variant="outline" className="px-8 py-6 rounded-xl text-lg font-semibold border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300">
                 Read More Stories
               </Button>

@@ -174,7 +174,7 @@ export default function PopularCategories() {
           {categories.map((cat, i) => (
             <motion.div
               key={cat.name}
-              variants={cardVariants}
+              variants={cardVariants as {}}
               whileHover="hover"
               onClick={() => router.push(`/tours?category=${cat.name}`)}
               className="group relative cursor-pointer"
