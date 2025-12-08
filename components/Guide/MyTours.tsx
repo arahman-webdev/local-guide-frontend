@@ -144,11 +144,10 @@ export default function MyTourListing({ tours }: { tours: any[] }) {
                 {/* Status */}
                 <TableCell>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      tour.isActive
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${tour.isActive
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
-                    }`}
+                      }`}
                   >
                     {tour.isActive ? "ACTIVE" : "INACTIVE"}
                   </span>
@@ -162,11 +161,10 @@ export default function MyTourListing({ tours }: { tours: any[] }) {
                     disabled={loadingId === tour.id}
                     variant={tour.isActive ? "outline" : "default"}
                     size="sm"
-                    className={`min-w-[120px] gap-2 ${
-                      tour.isActive
+                    className={`min-w-[120px] gap-2 ${tour.isActive
                         ? "border-red-300 text-red-600 hover:bg-red-50"
                         : "bg-green-500 text-white hover:bg-green-600"
-                    }`}
+                      }`}
                   >
                     {loadingId === tour.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

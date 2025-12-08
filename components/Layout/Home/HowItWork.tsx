@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Star, Users, Calendar, ChevronRight, Sparkles, CheckCircle, MessageCircle, CreditCard, Globe } from "lucide-react";
+import { MapPin, Star, Users, Calendar, ChevronRight, Sparkles, CheckCircle, MessageCircle, CreditCard, Globe, SparklesIcon } from "lucide-react";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
@@ -142,7 +142,7 @@ export default function HowItWork() {
           className="text-center mb-16"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-linear-to-r from-blue-50 to-cyan-50 border border-blue-100 mb-6">
-            <Sparkles className="w-4 h-4 text-blue-600" />
+            <SparklesIcon className="w-4 h-4 text-blue-600" />
             <span className="text-sm font-semibold text-blue-700 uppercase tracking-wider">
               Simple & Seamless
             </span>
@@ -161,14 +161,14 @@ export default function HowItWork() {
         </motion.div>
 
         {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
+        <div className="flex flex-col gap-12 items-center">
           {/* Steps Timeline */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            className="lg:w-1/2"
+            className="w-full"
           >
             <div className="relative">
               {/* Vertical Timeline Line */}
@@ -212,6 +212,7 @@ export default function HowItWork() {
                       }`}>
                         <div className={`bg-linear-to-br ${step.color} bg-clip-text text-transparent`}>
                           {step.icon}
+                          
                         </div>
                       </div>
 

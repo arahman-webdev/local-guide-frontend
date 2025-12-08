@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { MapPin, Calendar, DollarSign, Users, Star, Clock } from 'lucide-react';
+import Link from 'next/link';
 
 interface TourCardProps {
   tour: any;
@@ -94,9 +95,12 @@ export default function TourCard({ tour }: TourCardProps) {
               <p className="text-sm text-gray-500">Certified Local Guide</p>
             </div>
           </div>
+          <Link href={`/tours/${tour.slug}`}>
           <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">
             View Details
           </button>
+          </Link>
+          
         </div>
       </div>
     </div>

@@ -68,13 +68,13 @@ export async function proxy(request: NextRequest) {
         }
 
         // Check if user is trying to access guide routes without guide role
-        if (pathname.startsWith('/guide') && userRole !== 'GUIDE') {
+        if (pathname.startsWith('/dashboard/guide') && userRole !== 'GUIDE') {
             console.log(`Non-guide trying to access guide route: ${userRole} on ${pathname}`);
             return NextResponse.redirect(new URL('/dashboard', request.url));
         }
 
         // Check if user is trying to access tourist routes without tourist role
-        if (pathname.startsWith('/tourist') && userRole !== 'TOURIST') {
+        if (pathname.startsWith('/dashboard/tourist') && userRole !== 'TOURIST') {
             console.log(`Non-tourist trying to access tourist route: ${userRole} on ${pathname}`);
             return NextResponse.redirect(new URL('/dashboard', request.url));
         }
