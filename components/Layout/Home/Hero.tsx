@@ -43,8 +43,8 @@ export default function Hero() {
       className="relative bg-cover bg-center bg-no-repeat pt-24 pb-32 lg:pt-32 lg:pb-48 xl:pt-40 xl:pb-56 text-white overflow-hidden"
       style={{ backgroundImage: `url(${heroBg.src})` }}
     >
-      {/* Animated Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-purple-900/60 to-pink-800/50 backdrop-blur-[2px]"></div>
+      {/* Animated linear Overlay */}
+      <div className="absolute inset-0 bg-linear-to-br from-blue-900/70 via-purple-900/60 to-pink-800/50 backdrop-blur-[2px]"></div>
       
       {/* Animated floating elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -72,11 +72,11 @@ export default function Hero() {
           </div>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-center">
-            <span className="bg-gradient-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent">
               Discover Bangladesh
             </span>
             <br />
-            <span className="text-4xl md:text-6xl lg:text-7xl font-extrabold bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
+            <span className="text-4xl md:text-6xl lg:text-7xl font-extrabold bg-linear-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
               With Local Experts
             </span>
           </h1>
@@ -89,10 +89,10 @@ export default function Hero() {
           {/* Main Search Card */}
           <div className="w-full max-w-4xl mx-auto mb-12">
             <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-1 border border-white/20 shadow-2xl">
-              <div className="bg-gradient-to-br from-white/5 to-white/0 rounded-2xl p-6">
+              <div className="bg-linear-to-br from-white/5 to-white/0 rounded-2xl p-6">
                 <form onSubmit={handleSearch} className="space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl">
+                    <div className="p-3 bg-linear-to-br from-blue-500 to-cyan-400 rounded-xl">
                       <Search className="w-6 h-6 text-white" />
                     </div>
                     <h2 className="text-2xl font-bold text-white">
@@ -102,7 +102,7 @@ export default function Hero() {
 
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-400/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
+                      <div className="absolute inset-0 bg-linear-to-r from-blue-500/20 to-cyan-400/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
                       <div className="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 hover:border-white/20 transition-all duration-300">
                         <div className="flex items-center gap-3">
                           <MapPin className="w-5 h-5 text-cyan-300" />
@@ -119,13 +119,13 @@ export default function Hero() {
 
                     <Button
                       type="submit"
-                      className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold px-10 py-6 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl"
+                      className="group relative overflow-hidden bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold px-10 py-6 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl"
                     >
                       <span className="relative z-10 flex items-center gap-2">
                         <Search className="w-5 h-5" />
                         Explore Now
                       </span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-linear-to-r from-cyan-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </Button>
                   </div>
                 </form>
@@ -148,7 +148,7 @@ export default function Hero() {
                         >
                           <span className="text-xl">{dest.icon}</span>
                           <span className="font-medium">{dest.name}</span>
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-cyan-400/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:via-cyan-400/10 group-hover:to-purple-500/10 transition-all duration-500"></div>
+                          <div className="absolute inset-0 bg-linear-to-r from-blue-500/0 via-cyan-400/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:via-cyan-400/10 group-hover:to-purple-500/10 transition-all duration-500"></div>
                         </button>
                       ))}
                     </div>
@@ -166,7 +166,7 @@ export default function Hero() {
                           key={cat.name}
                           type="button"
                           onClick={() => router.push(`/tours?category=${cat.category}`)}
-                          className="group relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 backdrop-blur-sm border border-white/10 hover:border-white/30 rounded-xl px-5 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-[1.05]"
+                          className="group relative overflow-hidden bg-linear-to-br from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 backdrop-blur-sm border border-white/10 hover:border-white/30 rounded-xl px-5 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-[1.05]"
                         >
                           <span className="text-xl">{cat.icon}</span>
                           <span className="font-medium">{cat.name}</span>
@@ -185,19 +185,19 @@ export default function Hero() {
           {/* Stats Section */}
           <div className="flex flex-wrap justify-center gap-8 mb-10">
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+              <div className="text-3xl md:text-4xl font-bold bg-linear-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
                 500+
               </div>
               <div className="text-white/70 text-sm">Local Guides</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+              <div className="text-3xl md:text-4xl font-bold bg-linear-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
                 2,000+
               </div>
               <div className="text-white/70 text-sm">Authentic Tours</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+              <div className="text-3xl md:text-4xl font-bold bg-linear-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
                 98%
               </div>
               <div className="text-white/70 text-sm">Satisfaction Rate</div>
@@ -207,8 +207,8 @@ export default function Hero() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 items-center">
             <Link href="/register?role=guide" className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition duration-300"></div>
-              <Button className="relative bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold px-10 py-6 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02]">
+              <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-cyan-500 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition duration-300"></div>
+              <Button className="relative bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold px-10 py-6 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02]">
                 <span className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5" />
                   Become a Local Guide
@@ -224,6 +224,7 @@ export default function Hero() {
                 Browse All Experiences →
               </Button>
             </Link>
+           
           </div>
         </div>
       </div>
