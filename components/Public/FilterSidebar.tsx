@@ -1,8 +1,7 @@
-
 'use client';
 
 import React from 'react';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, MapPin, Globe } from 'lucide-react';
 
 const categories = [
   'FOOD',
@@ -12,15 +11,17 @@ const categories = [
   'NIGHTLIFE',
   'NATURE',
   'WILDLIFE',
-  'SHOPPING',
-
+  'SHOPPING'
 ];
-
-
 
 interface FilterSidebarProps {
   category: string;
   setCategory: (category: string) => void;
+  city: string;
+  setCity: (city: string) => void;
+  language: string;
+  setLanguage: (language: string) => void;
+  languageOptions: string[];
   priceRange: [number, number];
   setPriceRange: (range: [number, number]) => void;
   selectedDate: string;
@@ -32,6 +33,11 @@ interface FilterSidebarProps {
 export default function FilterSidebar({
   category,
   setCategory,
+  city,
+  setCity,
+  language,
+  setLanguage,
+  languageOptions,
   priceRange,
   setPriceRange,
   selectedDate,
@@ -54,6 +60,21 @@ export default function FilterSidebar({
         </button>
       </div>
 
+      {/* City Filter */}
+      <div className="mb-6">
+        <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          <MapPin size={16} />
+          City
+        </h4>
+        <input
+          type="text"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          placeholder="Enter city name"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       {/* Categories */}
       <div className="mb-6">
         <h4 className="font-semibold text-gray-700 mb-3">Categories</h4>
@@ -74,6 +95,24 @@ export default function FilterSidebar({
         </div>
       </div>
 
+      {/* Language Filter */}
+      {/* <div className="mb-6">
+        <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          <Globe size={16} />
+          Language
+        </h4>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+        >
+          <option value="">All Languages</option>
+          {languageOptions.map((lang) => (
+            <option key={lang} value={lang}>{lang}</option>
+          ))}
+        </select>
+      </div> */}
+
       {/* Price Range */}
       <div className="mb-6">
         <h4 className="font-semibold text-gray-700 mb-3">Price Range</h4>
@@ -85,7 +124,7 @@ export default function FilterSidebar({
           <input
             type="range"
             min="0"
-            max="1000"
+            max="10000"
             step="10"
             value={priceRange[0]}
             onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
@@ -94,7 +133,7 @@ export default function FilterSidebar({
           <input
             type="range"
             min="0"
-            max="1000"
+            max="10000"
             step="10"
             value={priceRange[1]}
             onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
@@ -114,20 +153,7 @@ export default function FilterSidebar({
         />
       </div>
 
-      {/* Duration */}
-      <div className="mb-8">
-        <h4 className="font-semibold text-gray-700 mb-3">Duration</h4>
-        <div className="grid grid-cols-2 gap-2">
-          {['2-4 hours', 'Half day', 'Full day', 'Multi-day'].map((duration) => (
-            <button
-              key={duration}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition"
-            >
-              {duration}
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* Apply Filters Button */}
       <button

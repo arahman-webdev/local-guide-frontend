@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, Globe } from 'lucide-react';
 import TourCard from './TourCard';
 import FilterSidebar from './FilterSidebar';
 import Pagination from './Pagination';
@@ -15,7 +15,9 @@ export default function ExploreTour() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('searchTerm') || '');
   const [category, setCategory] = useState(searchParams.get('category') || '');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [city, setCity] = useState(searchParams.get('city') || '');
+  const [language, setLanguage] = useState(searchParams.get('language') || '');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [sortBy, setSortBy] = useState(searchParams.get('sortBy') || 'createdAt');
   const [orderBy, setOrderBy] = useState(searchParams.get('orderBy') || 'desc');
@@ -24,6 +26,13 @@ export default function ExploreTour() {
   const [showMap, setShowMap] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [totalTours, setTotalTours] = useState(0);
+
+  // Language options (you can fetch these from API or define statically)
+  const languageOptions = [
+    'English', 'Spanish', 'French', 'German', 'Italian', 
+    'Japanese', 'Chinese', 'Korean', 'Arabic', 'Russian',
+    'Portuguese', 'Hindi', 'Bengali', 'Turkish'
+  ];
 
   // Build query parameters only for non-default values
   const buildQueryParams = () => {
@@ -38,6 +47,12 @@ export default function ExploreTour() {
     // Only add category if not empty
     if (category) params.append('category', category);
     
+    // Only add city if not empty
+    if (city) params.append('city', city);
+    
+    // Only add language if not empty
+    if (language) params.append('language', language);
+    
     // Only add sortBy if not 'createdAt' (default)
     if (sortBy !== 'createdAt') params.append('sortBy', sortBy);
     
@@ -49,13 +64,13 @@ export default function ExploreTour() {
     
     // Only add price filters if not default [0, 1000]
     if (priceRange[0] !== 0) params.append('minPrice', priceRange[0].toString());
-    if (priceRange[1] !== 1000) params.append('maxPrice', priceRange[1].toString());
+    if (priceRange[1] !== 10000) params.append('maxPrice', priceRange[1].toString());
     
     return params;
   };
 
   // Fetch tours based on filters
-  const fetchTours = async (isCategoryChange = false) => {
+  const fetchTours = async () => {
     setLoading(true);
     try {
       const params = buildQueryParams();
@@ -74,14 +89,16 @@ export default function ExploreTour() {
       apiParams.append('page', page.toString());
       apiParams.append('limit', '5'); // Request 9 items per page
       
-      // Add filters only if they have values
+      // Add all filters
       if (searchTerm) apiParams.append('searchTerm', searchTerm);
       if (category) apiParams.append('category', category);
+      if (city) apiParams.append('city', city);
+      if (language) apiParams.append('language', language);
       if (sortBy) apiParams.append('sortBy', sortBy);
       if (orderBy) apiParams.append('orderBy', orderBy);
       if (selectedDate) apiParams.append('date', selectedDate);
       if (priceRange[0] > 0) apiParams.append('minPrice', priceRange[0].toString());
-      if (priceRange[1] < 1000) apiParams.append('maxPrice', priceRange[1].toString());
+      if (priceRange[1] < 10000) apiParams.append('maxPrice', priceRange[1].toString());
 
       console.log('API Request URL:', `http://localhost:5000/api/tour?${apiParams.toString()}`);
       
@@ -94,11 +111,6 @@ export default function ExploreTour() {
         setTours(data.data || []);
         setTotalTours(data.pagination?.total || 0);
         setTotalPages(data.pagination?.totalPages || 1);
-        
-        // Debug: Check what we received
-        console.log('Received tours:', data.data?.length);
-        console.log('Total tours in DB:', data.pagination?.total);
-        console.log('Pagination data:', data.pagination);
       } else {
         console.error('API returned success: false', data);
         setTours([]);
@@ -145,33 +157,19 @@ export default function ExploreTour() {
     fetchTours();
   };
 
-  // Reset filters
+  // Reset all filters
   const handleResetFilters = () => {
     setSearchTerm('');
     setCategory('');
-    setPriceRange([0, 1000]);
+    setCity('');
+    setLanguage('');
+    setPriceRange([0, 10000]);
     setSelectedDate('');
     setSortBy('createdAt');
     setOrderBy('desc');
     setPage(1);
     // Fetch immediately after reset
     setTimeout(() => fetchTours(), 0);
-  };
-
-  // Handle apply filters from sidebar
-  const handleApplyFilters = () => {
-    setPage(1);
-    fetchTours(true);
-  };
-
-  // Handle category change from sidebar
-  const handleCategoryChange = (newCategory: string) => {
-    // Toggle category off if clicking the same one
-    const finalCategory = category === newCategory ? '' : newCategory;
-    setCategory(finalCategory);
-    setPage(1);
-    // Fetch immediately after category change
-    setTimeout(() => fetchTours(true), 0);
   };
 
   return (
@@ -185,24 +183,61 @@ export default function ExploreTour() {
           </p>
           
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-4 bg-white rounded-lg p-2 shadow-xl">
-              <div className="flex-1 flex items-center">
-                <Search className="ml-3 text-gray-400" size={20} />
+          <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-4 bg-white rounded-lg p-4 shadow-xl">
+              <div className="flex-1">
+                <div className="flex items-center mb-2">
+                  <Search className="ml-1 text-gray-400" size={18} />
+                  <label className="ml-2 text-sm text-gray-600">Search tours</label>
+                </div>
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search for tours, cities, or guides..."
-                  className="w-full px-4 py-3 text-gray-800 outline-none"
+                  placeholder="Search tour titles, descriptions..."
+                  className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition duration-300"
-              >
-                Search
-              </button>
+              
+              <div className="flex-1">
+                <div className="flex items-center mb-2">
+                  <MapPin className="ml-1 text-gray-400" size={18} />
+                  <label className="ml-2 text-sm text-gray-600">City</label>
+                </div>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Enter city name"
+                  className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center mb-2">
+                  <Globe className="ml-1 text-gray-400" size={18} />
+                  <label className="ml-2 text-sm text-gray-600">Language</label>
+                </div>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">All Languages</option>
+                  {languageOptions.map((lang) => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex items-end">
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition duration-300 h-[42px]"
+                >
+                  Search
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -216,12 +251,20 @@ export default function ExploreTour() {
             <div className="sticky top-8">
               <FilterSidebar
                 category={category}
-                setCategory={handleCategoryChange}
+                setCategory={setCategory}
+                city={city}
+                setCity={setCity}
+                language={language}
+                setLanguage={setLanguage}
+                languageOptions={languageOptions}
                 priceRange={priceRange}
                 setPriceRange={setPriceRange}
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
-                onApplyFilters={handleApplyFilters}
+                onApplyFilters={() => {
+                  setPage(1);
+                  fetchTours();
+                }}
                 onReset={handleResetFilters}
               />
             </div>
@@ -242,24 +285,27 @@ export default function ExploreTour() {
               
               <div className="flex items-center gap-4">
                 {/* Sort Options */}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="createdAt">Newest</option>
-                  <option value="fee">Price</option>
-                  <option value="title">Title</option>
-                </select>
-                
-                <select
-                  value={orderBy}
-                  onChange={(e) => setOrderBy(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="desc">Descending</option>
-                  <option value="asc">Ascending</option>
-                </select>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600">Sort by:</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="createdAt">Newest</option>
+                    <option value="fee">Price</option>
+                    <option value="title">Title</option>
+                  </select>
+                  
+                  <select
+                    value={orderBy}
+                    onChange={(e) => setOrderBy(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
+                  </select>
+                </div>
 
                 {/* Map Toggle */}
                 <button
@@ -275,6 +321,48 @@ export default function ExploreTour() {
                 </button>
               </div>
             </div>
+
+            {/* Active Filters */}
+            {(category || city || language || priceRange[0] > 0 || priceRange[1] < 10000 || selectedDate) && (
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium text-blue-800">Active Filters:</h3>
+                  <button
+                    onClick={handleResetFilters}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {category && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      Category: {category} ×
+                    </span>
+                  )}
+                  {city && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      City: {city} ×
+                    </span>
+                  )}
+                  {language && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      Language: {language} ×
+                    </span>
+                  )}
+                  {(priceRange[0] > 0 || priceRange[1] < 10000) && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      Price: ${priceRange[0]} - ${priceRange[1]} ×
+                    </span>
+                  )}
+                  {selectedDate && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      Date: {selectedDate} ×
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Loading State */}
             {loading ? (
@@ -292,7 +380,7 @@ export default function ExploreTour() {
               </div>
             ) : (
               <>
-                {/* Tours Grid - Show actual number of tours returned */}
+                {/* Tours Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {tours.map((tour) => (
                     <TourCard key={tour.id} tour={tour} />
