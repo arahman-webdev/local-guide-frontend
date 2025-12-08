@@ -73,9 +73,9 @@ const navData = {
     navMain: [
       { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
       { title: "Browse Tours", url: "/tours", icon: IconMapSearch },
-      { title: "My Bookings", url: "/tourist/bookings", icon: IconCalendar },
-      { title: "My Reviews", url: "/tourist/reviews", icon: IconStar },
-      { title: "Favorites", url: "/tourist/favourites", icon: IconHeart },
+      { title: "My Bookings", url: "/dashboard/tourist/bookings", icon: IconCalendar },
+      { title: "My Reviews", url: "/dadhboard/tourist/reviews", icon: IconStar },
+      { title: "Favorites", url: "/dadhboard/tourist/favourites", icon: IconHeart },
       { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
     ],
     navSecondary: [
