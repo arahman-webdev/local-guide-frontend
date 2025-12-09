@@ -61,7 +61,6 @@ export default function CreateTour() {
       minGroupSize: "1",
     },
   });
-
 const onSubmit = async (values: z.infer<typeof tourSchema>) => {
   try {
     setLoading(true);
@@ -90,25 +89,71 @@ const onSubmit = async (values: z.infer<typeof tourSchema>) => {
     // Append images
     images.forEach((img) => formData.append("images", img));
 
+    // Get token from localStorage
+    let token: string | null = null;
+    if (typeof window !== 'undefined') {
+      token = localStorage.getItem('accessToken');
+    }
+    
+    console.log('Create Tour - Token:', token ? 'Found' : 'Not found');
+
+    // Prepare headers - DON'T set Content-Type for FormData!
+    const headers: HeadersInit = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour`, {
       method: "POST",
-      credentials: "include",
-      body: formData,
+      headers: headers, // Only Authorization, NO Content-Type
+      credentials: "include", // Include cookies
+      body: formData, // Browser will set Content-Type automatically
     });
 
     const result = await res.json();
+    console.log('Create Tour Response:', result);
 
     if (!res.ok) {
-      toast.error(result.message || "Backend validation error");
+      // Check for specific error messages
+      if (res.status === 401) {
+        toast.error("Session expired. Please login again.");
+        // Clear storage and redirect
+        if (typeof window !== 'undefined') {
+          localStorage.clear();
+          sessionStorage.clear();
+          window.location.href = '/login';
+        }
+        return;
+      }
+      
+      const errorMessage = result.message || 
+                          result.error || 
+                          "Failed to create tour";
+      toast.error(errorMessage);
       return;
     }
 
-    toast.success("Tour created successfully!");
-    setImages([]);
-    form.reset(); // reset form
-  } catch (err) {
-    console.error(err);
-    toast.error("Something went wrong.");
+    if (result.success) {
+      toast.success("Tour created successfully!");
+      setImages([]);
+      form.reset(); // reset form
+      
+      // Optional: Redirect to tour list
+      // router.push('/dashboard/guide/my-tours');
+    } else {
+      toast.error(result.message || "Failed to create tour");
+    }
+
+  } catch (err: any) {
+    console.error('Create Tour Error:', err);
+    
+    if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+      toast.error("Cannot connect to server. Please check your connection.");
+    } else {
+      toast.error("Something went wrong while creating the tour.");
+    }
   } finally {
     setLoading(false);
   }

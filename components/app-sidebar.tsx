@@ -32,8 +32,9 @@ import {
 import Link from "next/link"
 import Image from "next/image"
 import logo from "@/app/images/logo.png"
-import { getMyProfile } from "@/app/utility/auth";
+import { getMyProfile } from "@/app/utils/auth";
 import { IUser } from "@/types/commonType";
+import { redirect } from "next/dist/server/api-utils";
 
 
 const navData = {
@@ -114,6 +115,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const role = user?.role || "TOURIST"
 
   const data = navData[role]
+
+
 
 
 

@@ -34,7 +34,11 @@ import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function ManageUsersTable({ users, accessToken }: { users: any[],accessToken:string }) {
+interface ManageUsersTableProps {
+  users: any[];
+}
+
+export default function ManageUsersTable({ users }: ManageUsersTableProps) {
   const [userList, setUserList] = useState(users);
   const [selectedUser, setSelectedUser] = useState<{
     id: string;
@@ -43,6 +47,7 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
   } | null>(null);
   const [newStatus, setNewStatus] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Handle status selection
   const handleStatusSelect = (userId: string, userName: string, status: string) => {
@@ -51,36 +56,74 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
     setIsDialogOpen(true);
   };
 
+  // Get token from localStorage
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('accessToken');
+    }
+    return null;
+  };
+
   // Update user status
   const handleStatusChange = async () => {
     if (!selectedUser || !newStatus) return;
 
     try {
-    
-
-      if (!accessToken) {
+      setLoading(true);
+      
+      const token = getToken();
+      
+      if (!token) {
         toast.error("Authentication required. Please log in again.");
+        setIsDialogOpen(false);
         return;
       }
+
+      console.log('Updating user status:', {
+        userId: selectedUser.id,
+        newStatus: newStatus,
+        token: token ? 'Token found' : 'No token'
+      });
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/status/${selectedUser.id}`, {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
-          "Cookie": `accessToken=${accessToken}`,
-          "Authorization": `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         credentials: "include",
         body: JSON.stringify({ status: newStatus }),
       });
 
-      
+      console.log('Status update response:', {
+        status: res.status,
+        statusText: res.statusText
+      });
 
       const data = await res.json();
+      console.log('Status update data:', data);
 
-      
+      if (!res.ok) {
+        if (res.status === 401) {
+          toast.error("Session expired. Please login again.");
+          // Clear storage and redirect
+          if (typeof window !== 'undefined') {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = '/login';
+          }
+          return;
+        }
+        
+        if (res.status === 403) {
+          toast.error("You don't have permission to update user status.");
+          return;
+        }
+        
+        throw new Error(data.message || `Failed to update status: ${res.status}`);
+      }
 
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         toast.error(data.message || "Failed to update status");
         return;
       }
@@ -99,9 +142,16 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
       setSelectedUser(null);
       setNewStatus("");
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating status:", err);
-      toast.error("Something went wrong. Please try again.");
+      
+      if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+        toast.error("Cannot connect to server. Please check your connection.");
+      } else {
+        toast.error(err.message || "Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,13 +187,13 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
                     />
                     <div>
                       <div className="font-medium text-blue-900">{user.name}</div>
-                      <span className="text-xs text-gray-600 capitalize">{user.role.toLowerCase()}</span>
+                      <span className="text-xs text-gray-600 capitalize">{user.role?.toLowerCase() || 'user'}</span>
                     </div>
                   </div>
                 </TableCell>
 
                 <TableCell>{user.email}</TableCell>
-                <TableCell className="capitalize">{user.role.toLowerCase()}</TableCell>
+                <TableCell className="capitalize">{user.role?.toLowerCase() || 'user'}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     user.status === "ACTIVE" 
@@ -154,7 +204,7 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
                       ? "bg-red-100 text-red-800"
                       : "bg-gray-100 text-gray-800"
                   }`}>
-                    {user.status}
+                    {user.status || 'INACTIVE'}
                   </span>
                 </TableCell>
 
@@ -193,15 +243,16 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
             <AlertDialogDescription>
               Are you sure you want to change the status of{" "}
               <span className="font-semibold text-blue-600">{selectedUser?.name}</span>{" "}
-              to <span className="font-semibold">{newStatus}</span>?
+              from <span className="font-semibold">{selectedUser?.status}</span> to{" "}
+              <span className="font-semibold">{newStatus}</span>?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>
+            <AlertDialogCancel onClick={() => setIsDialogOpen(false)} disabled={loading}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleStatusChange}>
-              Continue
+            <AlertDialogAction onClick={handleStatusChange} disabled={loading}>
+              {loading ? "Updating..." : "Continue"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

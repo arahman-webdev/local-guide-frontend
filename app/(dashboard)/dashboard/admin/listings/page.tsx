@@ -35,6 +35,8 @@ noStore()
    
 
     const data = result?.data
+
+    console.log("tour listings", data)
     
     if (!result.success) {
       throw new Error(result.message)

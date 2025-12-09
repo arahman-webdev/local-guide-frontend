@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-import { getMyProfile, logOut } from "@/app/utility/auth";
+import { getMyProfile, logOut } from "@/app/utils/auth";
 import { ProfileOpen } from "../Layout/Auth/ProfileOpen";
 
 export default function Navbar() {

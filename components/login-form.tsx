@@ -44,71 +44,82 @@ export function LoginForm({
       password: "",
     }
   })
+const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  try {
+    console.log('Login attempt with:', values.email);
+    
+    // Call backend login
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Remove credentials: 'include' since we're not using cookies
+      body: JSON.stringify({
+        email: values.email,
+        password: values.password
+      })
+    });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      console.log('Login attempt with:', values.email);
+    const data = await response.json();
+    console.log('Login response:', data);
+
+    if (data.status && data.data?.accessToken) {
+      // Store tokens in localStorage (MAIN STORAGE)
+      localStorage.setItem('accessToken', data.data.accessToken);
+      localStorage.setItem('refreshToken', data.data.refreshToken || '');
+      localStorage.setItem('userRole', data.data.user?.role || 'TOURIST');
+      localStorage.setItem('user', JSON.stringify(data.data.user || {}));
+      localStorage.setItem('loginTime', Date.now().toString());
       
-      // First, try the direct backend URL
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Origin': window.location.origin
-        },
-        credentials: 'include', // This sends cookies
-        body: JSON.stringify({
-          email: values.email,
-          password: values.password
-        })
-      });
+      // Also store in sessionStorage for immediate access
+      sessionStorage.setItem('token', data.data.accessToken);
+      sessionStorage.setItem('userRole', data.data.user?.role || 'TOURIST');
 
-      const data = await response.json();
-      console.log('Login response:', data);
-
-      if (data.status && data.data?.accessToken) {
-        // Store tokens in localStorage as backup
-        localStorage.setItem('accessToken', data.data.accessToken);
-        localStorage.setItem('refreshToken', data.data.refreshToken);
-        localStorage.setItem('userRole', data.data.user?.role || 'TOURIST');
-        localStorage.setItem('user', JSON.stringify(data.data.user || {}));
-        
-        // Also set in sessionStorage for immediate access
-        sessionStorage.setItem('token', data.data.accessToken);
-        
-        toast.success(data.message || "Login successful!");
-        
-        // Redirect based on user role
-        const userRole = data.data.user?.role;
-        switch(userRole) {
-          case 'ADMIN':
-            router.push('/dashboard/admin');
-            break;
-          case 'GUIDE':
-            router.push('/dashboard/guide');
-            break;
-          case 'TOURIST':
-            router.push('/dashboard/tourist');
-            break;
-          default:
-            router.push('/dashboard');
-        }
-      } else {
-        // Handle error from backend
-        const errorMessage = data.message || "Login failed. Please check your credentials.";
-        toast.error(errorMessage);
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
+      console.log("Token stored in localStorage:", localStorage.getItem('accessToken'));
+      console.log("User role stored:", localStorage.getItem('userRole'));
       
-      // Check if it's a network/CORS error
-      if (error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
-        toast.error("Cannot connect to server. Please check your internet connection.");
-      } else {
-        toast.error("An unexpected error occurred. Please try again.");
+      toast.success(data.message || "Login successful!");
+      
+      // IMPORTANT: Wait a moment to ensure storage is set before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Redirect based on user role
+      const userRole = data.data.user?.role || 'TOURIST';
+      
+      // Use window.location for immediate redirect (bypasses middleware issues)
+      let redirectUrl = '/dashboard';
+      switch(userRole.toUpperCase()) {
+        case 'ADMIN':
+          redirectUrl = '/dashboard/admin';
+          break;
+        case 'GUIDE':
+          redirectUrl = '/dashboard/guide';
+          break;
+        case 'TOURIST':
+          redirectUrl = '/dashboard/tourist';
+          break;
       }
+      
+      console.log('Redirecting to:', redirectUrl);
+      window.location.href = redirectUrl;
+      
+    } else {
+      // Handle error from backend
+      const errorMessage = data.message || "Login failed. Please check your credentials.";
+      toast.error(errorMessage);
+    }
+  } catch (error: any) {
+    console.error('Login error:', error);
+    
+    // Check if it's a network/CORS error
+    if (error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
+      toast.error("Cannot connect to server. Please check your internet connection.");
+    } else {
+      toast.error("An unexpected error occurred. Please try again.");
     }
   }
+};
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
