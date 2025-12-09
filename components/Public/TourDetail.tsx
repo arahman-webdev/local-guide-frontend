@@ -39,7 +39,7 @@ interface TourDetail {
     title: string;
     description: string;
     fee: number;
-    duration: number;
+    duration: string | number;
     maxGroupSize: number;
     category: string;
     city: string;
@@ -132,7 +132,7 @@ export default function TourDetail() {
         const fetchTour = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`http://localhost:5000/api/tour/${params.slug}`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour/${params.slug}`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -282,7 +282,7 @@ const handleBookingRequest = async () => {
 
 
 
-        const response = await fetch('http://localhost:5000/api/bookings', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -355,17 +355,31 @@ const handleBookingRequest = async () => {
     }
 };
     // Helper function to calculate end time (add tour duration)
-    const getEndTime = (startTime: string) => {
-        if (!tour?.duration) return '18:00'; // Default end time
+ const getEndTime = (startTime: string) => {
+    if (!tour?.duration) return '18:00'; // Default end time
+
+    try {
+        let durationHours: number;
+        
+        if (typeof tour.duration === 'string') {
+            const match = tour.duration.match(/\d+/);
+            durationHours = match ? parseInt(match[0], 10) : 3;
+        } else {
+            durationHours = tour.duration || 3;
+        }
 
         const [hours, minutes] = startTime.split(':').map(Number);
-        const totalMinutes = hours * 60 + minutes + tour.duration;
+        const totalMinutes = hours * 60 + minutes + (durationHours * 60);
 
-        const endHours = Math.floor(totalMinutes / 60);
+        const endHours = Math.floor(totalMinutes / 60) % 24;
         const endMinutes = totalMinutes % 60;
 
         return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
-    };
+    } catch (error) {
+        console.error('Error calculating end time:', error);
+        return '18:00';
+    }
+};
 
     if (loading) {
         return (

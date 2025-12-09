@@ -7,7 +7,7 @@ export default async function MyTourPage() {
 
     const cookieStore = cookies()
     const accessToken = (await cookieStore).get('accessToken')?.value
-    const res = await fetch("http://localhost:5000/api/tour/my-tours", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour/my-tours`, {
         method: "GET",
         cache: "no-store",
         headers: {

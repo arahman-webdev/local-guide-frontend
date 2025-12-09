@@ -26,7 +26,7 @@ export default function ManageBooking({ bookings }: { bookings: any[] }) {
     try {
       setLoadingId(id);
 
-      const res = await fetch(`http://localhost:5000/api/bookings/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/${id}`, {
         method: "DELETE",
         credentials: "include",
       });

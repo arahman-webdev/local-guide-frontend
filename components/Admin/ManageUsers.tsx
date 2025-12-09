@@ -63,7 +63,7 @@ export default function ManageUsersTable({ users, accessToken }: { users: any[],
         return;
       }
 
-      const res = await fetch(`http://localhost:5000/api/auth/status/${selectedUser.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/status/${selectedUser.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

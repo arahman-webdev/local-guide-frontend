@@ -1,33 +1,15 @@
-import { cookies } from 'next/headers'
+import { unstable_noStore as noStore } from 'next/cache';
+
 
 import ManageTourListingTable from '@/components/Admin/ManageTourListings'
 
-export default async function LisingPage() {
-  // Get cookies
-  // const cookieStore = cookies()
-  // const accessToken = (await cookieStore).get('accessToken')?.value
-  
-  // if (!accessToken) {
-  //   return (
-  //     <div className="p-8">
-  //       <h2>Authentication Required</h2>
-  //       <p>Please log in to view this page.</p>
-  //       <a href="/login">Go to Login</a>
-  //     </div>
-  //   )
-  // }
+export default async function AdminLisingPage() {
 
-  //  const deletion = async (id:string)=>{
-
-  // }
-
-
-  
-
+noStore()
 
   try {
     
-    const res = await fetch("http://localhost:5000/api/tour", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour`, {
       method: "GET",
       cache: "no-store",
     })

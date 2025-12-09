@@ -90,7 +90,7 @@ const onSubmit = async (values: z.infer<typeof tourSchema>) => {
     // Append images
     images.forEach((img) => formData.append("images", img));
 
-    const res = await fetch("http://localhost:5000/api/tour", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour`, {
       method: "POST",
       credentials: "include",
       body: formData,

@@ -7,7 +7,7 @@ export default async function BookingPage() {
 
     const cookieStore = cookies()
     const accessToken = (await cookieStore).get('accessToken')?.value
-    const res = await fetch("http://localhost:5000/api/bookings/my", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/my`, {
         method: "GET",
         cache: "no-store",
         headers: {

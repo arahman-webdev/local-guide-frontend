@@ -26,7 +26,7 @@ export default function MyTourBookings({ bookings }: { bookings: any[] }) {
       setLoadingId(id);
 
       const res = await fetch(
-        `http://localhost:5000/api/bookings/update-status/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/bookings/update-status/${id}`,
         {
           method: "PATCH",
           credentials: "include",

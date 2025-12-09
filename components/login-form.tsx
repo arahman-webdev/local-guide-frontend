@@ -19,84 +19,96 @@ import {
 
 import { FormDescription, FormField, FormMessage, FormItem, FormLabel, FormControl, Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
-
-
-
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-
 import Password from "./Layout/Auth/Password"
 import Link from "next/link"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-// import config from "@/config"
-
-
 const formSchema = z.object({
-
-  email: z.email().min(4, { message: "Email must be at least 4 charecter" }).max(50),
-  password: z.string().min(6, { error: "Password must be at least 6 charecter" }),
-  // confirmPassword: z.string().min(6, { error: "Confirm Password must be at least 6 charecter" }),
-
+  email: z.string().email({ message: "Please enter a valid email" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 })
-
-// .refine((data) => data.password === data.confirmPassword, {
-//   message: "Password do not match",
-//   path: ["confirmPassword"]
-
-
-
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-
-const router = useRouter()
-
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-
       email: "",
       password: "",
-
-
     }
   })
 
-
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
+      console.log('Login attempt with:', values.email);
+      
+      // First, try the direct backend URL
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin
         },
-        credentials: "include",
-        body: JSON.stringify(data),
-        cache: "no-store",
+        credentials: 'include', // This sends cookies
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password
+        })
       });
 
-      const result = await res.json();
-      console.log("from result", result);
+      const data = await response.json();
+      console.log('Login response:', data);
 
-      if (result.status || result.success) {
-        toast.success(result.message); 
-        router.push('/')
-      } else if(!result.success) {
-        // Handle error returned from backend
-        // const errorMessage = result?.message || "Something went wrong";
-        toast.error(result.message); 
+      if (data.status && data.data?.accessToken) {
+        // Store tokens in localStorage as backup
+        localStorage.setItem('accessToken', data.data.accessToken);
+        localStorage.setItem('refreshToken', data.data.refreshToken);
+        localStorage.setItem('userRole', data.data.user?.role || 'TOURIST');
+        localStorage.setItem('user', JSON.stringify(data.data.user || {}));
+        
+        // Also set in sessionStorage for immediate access
+        sessionStorage.setItem('token', data.data.accessToken);
+        
+        toast.success(data.message || "Login successful!");
+        
+        // Redirect based on user role
+        const userRole = data.data.user?.role;
+        switch(userRole) {
+          case 'ADMIN':
+            router.push('/dashboard/admin');
+            break;
+          case 'GUIDE':
+            router.push('/dashboard/guide');
+            break;
+          case 'TOURIST':
+            router.push('/dashboard/tourist');
+            break;
+          default:
+            router.push('/dashboard');
+        }
+      } else {
+        // Handle error from backend
+        const errorMessage = data.message || "Login failed. Please check your credentials.";
+        toast.error(errorMessage);
       }
     } catch (error: any) {
-      console.log(error);
-      toast.error("Failed to log in user");
+      console.error('Login error:', error);
+      
+      // Check if it's a network/CORS error
+      if (error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
+        toast.error("Cannot connect to server. Please check your internet connection.");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     }
-  };
-
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -108,7 +120,6 @@ const router = useRouter()
           <div className="grid gap-4">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-
                 <FormField
                   control={form.control}
                   name="email"
@@ -116,15 +127,18 @@ const router = useRouter()
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input className="rounded-none p-6" placeholder="arahman@gmail.com" type="email" {...field} />
+                        <Input 
+                          className="rounded-none p-6" 
+                          placeholder="arahman@gmail.com" 
+                          type="email" 
+                          {...field} 
+                        />
                       </FormControl>
-                      <FormDescription className="sr-only">
-                        This is your public display name.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
                 <FormField
                   control={form.control}
                   name="password"
@@ -132,61 +146,42 @@ const router = useRouter()
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Password {...field} />
+                        <Password {...field} placeholder="Enter your password" />
                       </FormControl>
-                      <FormDescription className="sr-only">
-                        This is your public display name.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                {/* <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Password {...field} />
-                      </FormControl>
-                      <FormDescription className="sr-only">
-                        This is your public display name.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
-
 
                 <Button
                   type="submit"
+                  disabled={form.formState.isSubmitting}
                   className="w-full bg-[#373DD2] hover:bg-[#373cd2e0] text-white font-semibold rounded-full py-2 text-base"
                 >
-                  Login
-
+                  {form.formState.isSubmitting ? "Logging in..." : "Login"}
                 </Button>
               </form>
             </Form>
 
             <div className="text-center text-sm">
-              Do you have an account?{" "}
-              <Link href={'/signup'} className="underline underline-offset-4">
+              Don't have an account?{" "}
+              <Link href={'/signup'} className="underline underline-offset-4 hover:text-blue-600">
                 SIGN UP
               </Link>
             </div>
           </div>
+          
           <div className="py-5 after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-card text-muted-foreground relative z-10 px-2">
               Or continue with
             </span>
           </div>
+          
           <div className="">
             <Button
               variant="outline"
               type="button"
               className="w-full flex items-center justify-center gap-2 font-semibold rounded-full py-2"
-            // onClick={() => window.open(`${config.baseUrl}/auth/google`)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

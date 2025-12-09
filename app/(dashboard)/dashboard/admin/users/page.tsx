@@ -21,7 +21,7 @@ export default async function ManageUsersPage() {
 
   try {
     // MANUALLY forward cookies to your backend
-    const res = await fetch("http://localhost:5000/api/auth/users", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, {
       method: "GET",
       cache: "no-store",
       headers: {

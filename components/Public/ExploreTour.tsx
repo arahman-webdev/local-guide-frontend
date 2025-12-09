@@ -1,13 +1,94 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, MapPin, Globe } from 'lucide-react';
 import TourCard from './TourCard';
 import FilterSidebar from './FilterSidebar';
 import Pagination from './Pagination';
 
-export default function ExploreTour() {
+// Loading component
+function ExploreTourLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section Skeleton */}
+      <div className="bg-linear-to-r from-blue-600 to-blue-800 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="h-8 bg-blue-500/50 rounded w-1/2 mb-4"></div>
+          <div className="h-4 bg-blue-500/50 rounded w-1/3 mb-8"></div>
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-4 bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+              <div className="flex-1">
+                <div className="h-4 bg-blue-500/50 rounded w-24 mb-2"></div>
+                <div className="h-10 bg-white/20 rounded"></div>
+              </div>
+              <div className="flex-1">
+                <div className="h-4 bg-blue-500/50 rounded w-24 mb-2"></div>
+                <div className="h-10 bg-white/20 rounded"></div>
+              </div>
+              <div className="flex-1">
+                <div className="h-4 bg-blue-500/50 rounded w-24 mb-2"></div>
+                <div className="h-10 bg-white/20 rounded"></div>
+              </div>
+              <div className="flex items-end">
+                <div className="h-10 bg-blue-500/70 rounded w-24"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Skeleton */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar Skeleton */}
+          <div className="lg:w-1/4">
+            <div className="sticky top-8">
+              <div className="bg-white rounded-xl shadow p-6 space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i}>
+                    <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                    <div className="h-10 bg-gray-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Tours List Skeleton */}
+          <div className="lg:w-3/4">
+            <div className="flex justify-between items-center mb-6">
+              <div className="space-y-2">
+                <div className="h-6 bg-gray-300 rounded w-48"></div>
+                <div className="h-4 bg-gray-300 rounded w-32"></div>
+              </div>
+              <div className="flex gap-2">
+                <div className="h-10 bg-gray-300 rounded w-32"></div>
+                <div className="h-10 bg-gray-300 rounded w-32"></div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
+                  <div className="h-48 bg-gray-300"></div>
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-1/4"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main content component wrapped in Suspense
+function ExploreTourContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -27,7 +108,7 @@ export default function ExploreTour() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [totalTours, setTotalTours] = useState(0);
 
-  // Language options (you can fetch these from API or define statically)
+  // Language options
   const languageOptions = [
     'English', 'Spanish', 'French', 'German', 'Italian', 
     'Japanese', 'Chinese', 'Korean', 'Arabic', 'Russian',
@@ -38,31 +119,14 @@ export default function ExploreTour() {
   const buildQueryParams = () => {
     const params = new URLSearchParams();
     
-    // Only add page if not 1
     if (page !== 1) params.append('page', page.toString());
-    
-    // Only add searchTerm if not empty
     if (searchTerm) params.append('searchTerm', searchTerm);
-    
-    // Only add category if not empty
     if (category) params.append('category', category);
-    
-    // Only add city if not empty
     if (city) params.append('city', city);
-    
-    // Only add language if not empty
     if (language) params.append('language', language);
-    
-    // Only add sortBy if not 'createdAt' (default)
     if (sortBy !== 'createdAt') params.append('sortBy', sortBy);
-    
-    // Only add orderBy if not 'desc' (default)
     if (orderBy !== 'desc') params.append('orderBy', orderBy);
-    
-    // Only add date if selected
     if (selectedDate) params.append('date', selectedDate);
-    
-    // Only add price filters if not default [0, 1000]
     if (priceRange[0] !== 0) params.append('minPrice', priceRange[0].toString());
     if (priceRange[1] !== 10000) params.append('maxPrice', priceRange[1].toString());
     
@@ -84,12 +148,11 @@ export default function ExploreTour() {
         router.push(newUrl);
       }
 
-      // For the API call, we need all parameters
+      // For the API call
       const apiParams = new URLSearchParams();
       apiParams.append('page', page.toString());
-      apiParams.append('limit', '5'); // Request 9 items per page
+      apiParams.append('limit', '5');
       
-      // Add all filters
       if (searchTerm) apiParams.append('searchTerm', searchTerm);
       if (category) apiParams.append('category', category);
       if (city) apiParams.append('city', city);
@@ -100,12 +163,8 @@ export default function ExploreTour() {
       if (priceRange[0] > 0) apiParams.append('minPrice', priceRange[0].toString());
       if (priceRange[1] < 10000) apiParams.append('maxPrice', priceRange[1].toString());
 
-      console.log('API Request URL:', `http://localhost:5000/api/tour?${apiParams.toString()}`);
-      
-      const response = await fetch(`http://localhost:5000/api/tour?${apiParams.toString()}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour?${apiParams.toString()}`);
       const data = await response.json();
-      
-      console.log('API Response:', data);
       
       if (data.success) {
         setTours(data.data || []);
@@ -145,7 +204,7 @@ export default function ExploreTour() {
   // Fetch when sort or order changes
   useEffect(() => {
     if (!isInitialLoad) {
-      setPage(1); // Reset to page 1 when sorting changes
+      setPage(1);
       fetchTours();
     }
   }, [sortBy, orderBy]);
@@ -168,14 +227,13 @@ export default function ExploreTour() {
     setSortBy('createdAt');
     setOrderBy('desc');
     setPage(1);
-    // Fetch immediately after reset
     setTimeout(() => fetchTours(), 0);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
+      <div className="bg-linear-to-r from-blue-600 to-blue-800 text-white py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Discover Authentic Local Experiences</h1>
           <p className="text-blue-100 text-lg mb-8">
@@ -422,5 +480,14 @@ export default function ExploreTour() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component with Suspense
+export default function ExploreTour() {
+  return (
+    <Suspense fallback={<ExploreTourLoading />}>
+      <ExploreTourContent />
+    </Suspense>
   );
 }

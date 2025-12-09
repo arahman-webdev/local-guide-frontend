@@ -27,7 +27,7 @@ export default function ManageTourListingTable({ tours }: { tours: any[] }) {
       setLoadingId(id);
 
       const res = await fetch(
-        `http://localhost:5000/api/tour/toggle-status/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/tour/toggle-status/${id}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -49,7 +49,7 @@ export default function ManageTourListingTable({ tours }: { tours: any[] }) {
     try {
       setLoadingId(id);
 
-      const res = await fetch(`http://localhost:5000/api/tour/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour/${id}`, {
         method: "DELETE",
         credentials: "include",
       });

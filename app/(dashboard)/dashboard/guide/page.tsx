@@ -20,7 +20,7 @@ export default function DashboardPage() {
 
   if (userRole === 'TOURIST') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-6">
+      <div className="min-h-screen bg-linear-to-b from-gray-50 to-white p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Tourist Dashboard</h1>
           {/* Tourist-specific content */}
@@ -31,7 +31,7 @@ export default function DashboardPage() {
 
   // Guide Dashboard
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-linear-to-b from-blue-50 to-white p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
