@@ -1,5 +1,5 @@
-import ManageBooking from "@/components/Admin/ManageBooking"
-import MyTourListing from "@/components/Guide/MyTours"
+
+import MyTourListing from "@/components/Dashboard/Guide/MyTours";
 import { cookies } from "next/headers"
 
 export default async function MyTourPage() {

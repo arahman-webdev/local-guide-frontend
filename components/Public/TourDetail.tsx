@@ -236,7 +236,7 @@ export default function TourDetail() {
             }
 
             setBookingLoading(true);
-            const loadingToast = toast.loading('Creating your booking...');
+           
 
             // Convert to ISO string
             const startTimeISO = `${selectedDate}T${selectedStartTime}:00Z`;
@@ -266,7 +266,7 @@ export default function TourDetail() {
             });
 
             const result = await response.json();
-            toast.dismiss(loadingToast);
+           
 
             console.log('Booking response:', result);
 

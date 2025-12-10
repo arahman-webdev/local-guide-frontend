@@ -9,12 +9,21 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+
 
 export default function LeavReview() {
+
+
+
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Rating</Button>
+        <Button variant="ghost">Leav A Reiview</Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 p-0 [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
@@ -31,7 +40,7 @@ export default function LeavReview() {
                     Your Rating?
                   </legend>
                   <RadioGroup className="-space-x-px flex gap-0 rounded-md shadow-xs">
-                    {[ 1, 2, 3, 4, 5].map((number) => (
+                    {[1, 2, 3, 4, 5].map((number) => (
                       <label
                         className="relative flex size-9 flex-1 cursor-pointer flex-col items-center justify-center gap-3 border border-input text-center text-sm outline-none transition-[color,box-shadow] first:rounded-s-md last:rounded-e-md has-data-[state=checked]:z-10 has-data-disabled:cursor-not-allowed has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-data-disabled:opacity-50 has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50"
                         key={number}
@@ -46,7 +55,7 @@ export default function LeavReview() {
                     ))}
                   </RadioGroup>
                 </fieldset>
-               
+
               </div>
 
               <div className="*:not-first:mt-2">

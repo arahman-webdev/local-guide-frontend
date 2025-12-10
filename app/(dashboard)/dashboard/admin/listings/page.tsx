@@ -1,7 +1,7 @@
+import ManageTourListingTable from '@/components/Dashboard/Admin/ManageTourListings';
 import { unstable_noStore as noStore } from 'next/cache';
 
 
-import ManageTourListingTable from '@/components/Admin/ManageTourListings'
 
 export default async function AdminLisingPage() {
 

@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Eye, Trash2, Loader2 } from "lucide-react";
 import { IconEdit, IconUsers } from "@tabler/icons-react";
-import { ConfirmationAlert } from "../sharedComponent/ConfirmationAlert";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ConfirmationAlert } from "@/components/sharedComponent/ConfirmationAlert";
 
 export default function MyTourListing({ tours }: { tours: any[] }) {
   const router = useRouter();

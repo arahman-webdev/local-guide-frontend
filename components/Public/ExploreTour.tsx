@@ -228,7 +228,12 @@ function ExploreTourContent() {
     setOrderBy('desc');
     setPage(1);
     setTimeout(() => fetchTours(), 0);
+
+
   };
+
+
+    console.log("from tour page",tours)
 
   return (
     <div className="min-h-screen bg-gray-50">
