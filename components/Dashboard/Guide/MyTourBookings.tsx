@@ -20,17 +20,36 @@ import { useState } from "react";
 export default function MyTourBookings({ bookings }: { bookings: any[] }) {
   const router = useRouter();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [refreshBooking, setRefreshBooking] = useState(bookings)
+
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('accessToken');
+    }
+    return null;
+  };
 
   const updateBookingStatus = async (id: string, newStatus: string) => {
     try {
       setLoadingId(id);
 
+      const token = getToken();
+
+      if (!token) {
+        toast.error("Authentication required. Please log in again.");
+
+        return;
+      }
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/bookings/update-status/${id}`,
         {
           method: "PATCH",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
           credentials: "include",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: newStatus }),
         }
       );
@@ -42,7 +61,18 @@ export default function MyTourBookings({ bookings }: { bookings: any[] }) {
         return;
       }
 
+
+
       toast.success(`Booking ${newStatus.toLowerCase()} successfully`);
+
+      setRefreshBooking(prevBookings =>
+        prevBookings.map(booking =>
+          booking.bookingId === id
+            ? { ...booking, status: newStatus }
+            : booking
+        )
+      );
+
       router.refresh();
     } catch (error) {
       toast.error("Something went wrong");
@@ -66,6 +96,7 @@ export default function MyTourBookings({ bookings }: { bookings: any[] }) {
               <TableHead className="font-semibold text-blue-700">Start</TableHead>
               <TableHead className="font-semibold text-blue-700">End</TableHead>
               <TableHead className="font-semibold text-blue-700">Status</TableHead>
+              <TableHead className="font-semibold text-blue-700">Payment Status</TableHead>
               <TableHead className="text-right font-semibold text-blue-700">
                 Actions
               </TableHead>
@@ -73,7 +104,7 @@ export default function MyTourBookings({ bookings }: { bookings: any[] }) {
           </TableHeader>
 
           <TableBody>
-            {bookings?.map((booking) => (
+            {refreshBooking?.map((booking) => (
               <TableRow
                 key={booking.bookingId}
                 className="hover:bg-blue-50/50 transition"
@@ -110,17 +141,31 @@ export default function MyTourBookings({ bookings }: { bookings: any[] }) {
 
                 <TableCell>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      booking.status === "PENDING"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : booking.status === "CONFIRMED"
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${booking.status === "PENDING"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : booking.status === "CONFIRMED"
                         ? "bg-green-100 text-green-700"
                         : booking.status === "COMPLETED"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
                   >
                     {booking.status}
+                  </span>
+                </TableCell>
+
+                <TableCell>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${booking.paymentStatus.status === "PENDING"
+                      ? "bg-red-100 text-yellow-700"
+                      : booking.status === "CONFIRMED"
+                        ? "bg-green-100 text-green-700"
+                        : booking.status === "COMPLETED"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                  >
+                    {booking.paymentStatus.status === "PENDING" ? "Unpaid" : "Paid"}
                   </span>
                 </TableCell>
 
@@ -160,6 +205,7 @@ export default function MyTourBookings({ bookings }: { bookings: any[] }) {
                     </>
                   )}
 
+
                   {/* CONFIRMED → COMPLETE / CANCEL */}
                   {booking.status === "CONFIRMED" && (
                     <>
@@ -198,8 +244,8 @@ export default function MyTourBookings({ bookings }: { bookings: any[] }) {
                   {/* COMPLETED / CANCELLED → no actions */}
                   {(booking.status === "COMPLETED" ||
                     booking.status === "CANCELLED") && (
-                    <span className="text-gray-400 text-sm">No actions</span>
-                  )}
+                      <span className="text-gray-400 text-sm">No actions</span>
+                    )}
                 </TableCell>
               </TableRow>
             ))}

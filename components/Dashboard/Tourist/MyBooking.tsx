@@ -18,6 +18,7 @@ import { IconUsers } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
+import LeavReview from "./LeavingReview";
 
 export default function MyBooking({ bookings }: { bookings: any[] }) {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function MyBooking({ bookings }: { bookings: any[] }) {
               <TableHead className="font-semibold text-blue-700">Start</TableHead>
               <TableHead className="font-semibold text-blue-700">End</TableHead>
               <TableHead className="font-semibold text-blue-700">Status</TableHead>
+              <TableHead className="font-semibold text-blue-700">Actions</TableHead>
              
             </TableRow>
           </TableHeader>
@@ -81,7 +83,9 @@ export default function MyBooking({ bookings }: { bookings: any[] }) {
                     {booking.status}
                   </span>
                 </TableCell>
-
+                <TableCell>
+                 <LeavReview />
+                </TableCell>
                 
               </TableRow>
             ))}

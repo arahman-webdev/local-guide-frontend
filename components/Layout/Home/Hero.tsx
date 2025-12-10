@@ -28,7 +28,7 @@ export default function Hero() {
     { name: 'Sylhet', type: 'city', icon: '🍵' },
     { name: 'Cox\'s Bazar', type: 'beach', icon: '🏖️' },
     { name: 'Sundarbans', type: 'nature', icon: '🐯' },
-    { name: 'Bandarban', type: 'hills', icon: '⛰️' },
+    
   ];
 
   const popularCategories = [
@@ -40,7 +40,7 @@ export default function Hero() {
 
   return (
     <section
-      className="relative bg-cover bg-center bg-no-repeat pt-24 pb-32 lg:pt-32 lg:pb-48 xl:pt-40 xl:pb-56 text-white overflow-hidden"
+      className="relative bg-cover bg-center bg-no-repeat pt-24 pb-20 lg:pt-32 lg:pb-48 xl:pt-40 xl:pb-56 text-white overflow-hidden"
       style={{ backgroundImage: `url(${heroBg.src})` }}
     >
       {/* Animated linear Overlay */}
@@ -71,7 +71,7 @@ export default function Hero() {
             <Star className="w-4 h-4 text-yellow-300 ml-2" />
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-center">
+          <h1 className="text-5xl md:text-7xl  font-bold mb-6 leading-tight text-center">
             <span className="bg-linear-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent">
               Discover Bangladesh
             </span>

@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Eye, Trash2, Loader2 } from "lucide-react";
 import { IconUsers } from "@tabler/icons-react";
-import { ConfirmationAlert } from "../sharedComponent/ConfirmationAlert";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";

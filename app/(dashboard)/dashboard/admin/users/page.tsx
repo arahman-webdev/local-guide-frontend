@@ -1,8 +1,9 @@
 'use client'; // Make it a client component
 
 import { useState, useEffect } from 'react';
-import ManageUsers from '@/components/Admin/ManageUsers';
+
 import { useRouter } from 'next/navigation';
+import ManageUsersTable from '@/components/Dashboard/Admin/ManageUsers';
 
 export default function ManageUsersPage() {
   const [users, setUsers] = useState([]);
@@ -119,5 +120,5 @@ export default function ManageUsersPage() {
     );
   }
 
-  return <ManageUsers users={users}  />;
+  return <ManageUsersTable users={users}  />;
 }
