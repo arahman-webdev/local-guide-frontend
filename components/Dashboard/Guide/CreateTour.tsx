@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ImageUpload from "@/components/sharedComponent/MultipleImagesUploading";
+import { useRouter } from "next/navigation";
 
 // PRISMA ENUM
 const categories = [
@@ -138,6 +139,7 @@ const ArrayInputField = ({
 export default function CreateTour() {
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const router = useRouter()
   
   // State for array fields
   const [includes, setIncludes] = useState<string[]>([]);
@@ -228,6 +230,7 @@ export default function CreateTour() {
         setTags([]);
         setAvailableDays([]);
         form.reset();
+        router.push('/dashboard/guide/my-tours')
       }
 
     } catch (err: any) {

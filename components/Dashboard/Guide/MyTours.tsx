@@ -189,7 +189,7 @@ export default function MyTourListing({ tours }: { tours: any[] }) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => router.push(`/tour/${tour.slug}`)}
+                    onClick={() => router.push(`/tours/${tour.slug}`)}
                   >
                     <Eye size={19} className="text-blue-600" />
                   </Button>

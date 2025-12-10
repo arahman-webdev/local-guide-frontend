@@ -2,44 +2,37 @@
 
 import { IconUsers } from "@tabler/icons-react";
 import React, { useState } from "react";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "../ui/table";
+
 import Image from "next/image";
 import { Eye, Trash2 } from "lucide-react";
-import { ConfirmationAlert } from "../sharedComponent/ConfirmationAlert";
+
 import { useRouter } from "next/navigation";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ConfirmationAlert } from "@/components/sharedComponent/ConfirmationAlert";
 
 export default function ManageBooking({ bookings }: { bookings: any[] }) {
     const router = useRouter()
- const [loadingId, setLoadingId] = useState<string | null>(null);
+    const [loadingId, setLoadingId] = useState<string | null>(null);
 
+    //  Handle Delete
+    const handleDelete = async (id: string) => {
+        try {
+            setLoadingId(id);
 
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/${id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
 
-      //  Handle Delete
-  const handleDelete = async (id: string) => {
-    try {
-      setLoadingId(id);
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      const data = await res.json();
-      console.log("Deleted:", data);
-      router.refresh();
-    } catch (error) {
-      console.error("Delete Error:", error);
-    } finally {
-      setLoadingId(null);
-    }
-  };
+            const data = await res.json();
+            console.log("Deleted:", data);
+            router.refresh();
+        } catch (error) {
+            console.error("Delete Error:", error);
+        } finally {
+            setLoadingId(null);
+        }
+    };
 
     return (
         <div>
