@@ -276,7 +276,7 @@ export default function ManageTourListingTable({ tours }: { tours: any[] }) {
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    onClick={() => viewTour(tour.id)}
+                    onClick={() => viewTour(tour.slug)}
                     title="View Tour"
                   >
                     <Eye size={19} className="text-blue-600" />

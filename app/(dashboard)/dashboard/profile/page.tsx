@@ -9,7 +9,8 @@ import {
   User, Mail, Phone, MapPin, Calendar, Shield, 
   Edit2, Save, X, Globe, Award, Star, Users,
   CreditCard, Clock, CheckCircle, Award as Trophy,
-  Camera, Upload, Trash2, Image as ImageIcon
+  Camera, Upload, Trash2, Image as ImageIcon,
+  LanguagesIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +31,7 @@ interface UserProfile {
   address?: string;
   city?: string;
   country?: string;
-  joinedAt: string;
+  createdAt: string;
   verified: boolean;
   totalReviews?: number;
   averageRating?: number;
@@ -416,21 +417,20 @@ const handleSaveProfile = async () => {
               className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Award className="h-5 w-5 text-blue-600" />
-                Activity Stats
+                <User className="h-5 w-5 text-blue-600" />
+                Personal Info
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-linear-to-r from-blue-50 to-cyan-50">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 rounded-lg">
-                      <Star className="h-5 w-5 text-blue-600" />
+                      <Calendar className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Average Rating</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {user.averageRating?.toFixed(1) || 'N/A'}
-                        <span className="text-sm text-gray-500">/5</span>
-                      </p>
+                    <p className="text-sm text-gray-600">Joined</p>
+                    <p className="font-medium text-gray-900">
+                      {formatDate(user.createdAt)}
+                    </p>
                     </div>
                   </div>
                 </div>
@@ -438,107 +438,10 @@ const handleSaveProfile = async () => {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-linear-to-r from-green-50 to-emerald-50">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-green-100 rounded-lg">
-                      <Users className="h-5 w-5 text-green-600" />
+                      <MapPin className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Total Reviews</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {user.totalReviews || 0}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-lg bg-linear-to-r from-purple-50 to-pink-50">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <CreditCard className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Total Bookings</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {user.totalBookings || 0}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Image Upload Instructions */}
-            {editing && newImage && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-linear-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <ImageIcon className="h-5 w-5 text-blue-600" />
-                  New Profile Picture
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden">
-                        <Image
-                          src={imagePreview || ''}
-                          alt="Preview"
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">
-                          {newImage.name}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {(newImage.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleImageRemove}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    Click save to update your profile picture
-                  </p>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Personal Information */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <User className="h-5 w-5 text-blue-600" />
-                Personal Information
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-600">Joined</p>
-                    <p className="font-medium text-gray-900">
-                      {formatDate(user.joinedAt)}
-                    </p>
-                  </div>
-                </div>
-
-                {user.address && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-gray-600">Address</p>
+                            <p className="text-sm text-gray-600">Address</p>
                       {editing ? (
                         <Textarea
                           value={editForm.address || ''}
@@ -552,34 +455,26 @@ const handleSaveProfile = async () => {
                       )}
                     </div>
                   </div>
-                )}
+                </div>
 
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-600">Location</p>
-                    {editing ? (
-                      <div className="grid grid-cols-2 gap-2 mt-1">
-                        <Input
-                          value={editForm.city || ''}
-                          onChange={(e) => handleInputChange('city', e.target.value)}
-                          placeholder="City"
-                        />
-                        <Input
-                          value={editForm.country || ''}
-                          onChange={(e) => handleInputChange('country', e.target.value)}
-                          placeholder="Country"
-                        />
-                      </div>
-                    ) : (
-                      <p className="font-medium text-gray-900">
-                        {user.city || 'Not specified'}, {user.country || 'Not specified'}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-linear-to-r from-purple-50 to-pink-50">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <LanguagesIcon className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Language</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {"Bangla, English"}
+                        
                       </p>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
             </motion.div>
+
+         
 
         
           </div>

@@ -40,11 +40,10 @@ import { redirect } from "next/dist/server/api-utils";
 const navData = {
   ADMIN: {
     navMain: [
-      { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
+      { title: "Dashboard", url: "/dashboard/admin", icon: IconLayout2 },
       { title: "Manage Users", url: "/dashboard/admin/users", icon: IconUsers },
       { title: "Manage Tours", url: "/dashboard/admin/listings", icon: IconMap },
       { title: "Bookings", url: "/dashboard/admin/bookings", icon: IconCalendar },
-      { title: "Reviews", url: "/dashboard/admin/reviews", icon: IconStar },
       { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
     ],
     navSecondary: [
@@ -56,7 +55,7 @@ const navData = {
 
   GUIDE: {
     navMain: [
-      { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
+      { title: "Dashboard", url: "/dashboard/guide", icon: IconLayout2 },
       { title: "My Tours", url: "/dashboard/guide/my-tours", icon: IconMap },
       { title: "Create Tour", url: "/dashboard/guide/create-tour", icon: IconPlus },
       { title: "Bookings Requests", url: "/dashboard/guide/bookings", icon: IconCalendar },
@@ -72,7 +71,7 @@ const navData = {
 
   TOURIST: {
     navMain: [
-      { title: "Dashboard", url: "/dashboard", icon: IconLayout2 },
+   
       { title: "Browse Tours", url: "/tours", icon: IconMapSearch },
       { title: "My Bookings", url: "/dashboard/tourist/bookings", icon: IconCalendar },
       { title: "My Reviews", url: "/dadhboard/tourist/reviews", icon: IconStar },
