@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { X, Plus, CheckCircle, XCircle, ArrowLeft, Loader2, Save } from "lucide-react";
+import { X, Plus, CheckCircle, XCircle, Calendar, Tag } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ImageUpload from "@/components/sharedComponent/MultipleImagesUploading";
-import { useRouter, useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 // PRISMA ENUM
 const categories = [
@@ -26,21 +26,21 @@ const categories = [
 ];
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const languages = ["English", "Spanish", "French", "German", "Chinese", "Japanese", "Bangla", "Hindi", "Arabic", "Russian"];
 
 // ⭐ ZOD SCHEMA
 export const tourSchema = z.object({
-  title: z.string().min(3, "Title required"),
-  description: z.string().min(10, "Description is too short"),
-  itinerary: z.string().min(10, "Itinerary is required"),
-  fee: z.string().min(1),
-  duration: z.string().min(1, "Duration required"),
-  meetingPoint: z.string().min(2),
-  maxGroupSize: z.string().min(1),
-  minGroupSize: z.string().min(1),
-  category: z.string().min(1),
-  city: z.string().min(1),
-  country: z.string().min(1),
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  itinerary: z.string().min(10, "Itinerary must be at least 10 characters"),
+  fee: z.string().min(1, "Fee is required"),
+  duration: z.string().min(1, "Duration is required"),
+  meetingPoint: z.string().min(2, "Meeting point is required"),
+  maxGroupSize: z.string().min(1, "Max group size is required"),
+  minGroupSize: z.string().min(1, "Min group size is required"),
+  category: z.string().min(1, "Category is required"),
+  language: z.string().min(1, "Language is required"),
+  city: z.string().min(1, "City is required"),
+  country: z.string().min(1, "Country is required"),
 });
 
 // Component for array input fields
@@ -130,6 +130,50 @@ const ArrayInputField = ({
   );
 };
 
+// Day Selection Component
+const DaySelection = ({
+  days,
+  selectedDays,
+  onDayToggle,
+}: {
+  days: string[];
+  selectedDays: string[];
+  onDayToggle: (day: string) => void;
+}) => {
+  return (
+    <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/50">
+      <div className="flex items-center gap-2 mb-3">
+        <Calendar className="w-5 h-5 text-blue-600" />
+        <h3 className="font-semibold text-lg text-blue-800">Available Days</h3>
+      </div>
+      <p className="text-sm text-gray-600 mb-4">Select days when this tour is available</p>
+      
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2">
+        {days.map((day) => (
+          <button
+            key={day}
+            type="button"
+            onClick={() => onDayToggle(day)}
+            className={`p-3 rounded-lg border transition-all ${
+              selectedDays.includes(day)
+                ? "bg-blue-600 text-white border-blue-700"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            {day}
+          </button>
+        ))}
+      </div>
+      
+      {selectedDays.length === 0 && (
+        <p className="text-sm text-blue-500 text-center py-3">
+          Select at least one day for availability
+        </p>
+      )}
+    </div>
+  );
+};
+
 export default function EditTour() {
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -137,52 +181,48 @@ export default function EditTour() {
   const [fetching, setFetching] = useState(true);
   const router = useRouter();
   const params = useParams();
-  const tourId = params.id as string;
-  
+
   // State for array fields
   const [includes, setIncludes] = useState<string[]>([]);
   const [excludes, setExcludes] = useState<string[]>([]);
-  const [whatToBring, setWhatToBring] = useState<string[]>([]);
-  const [requirements, setRequirements] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [availableDays, setAvailableDays] = useState<string[]>([]);
-  const [tourLanguages, setTourLanguages] = useState<string[]>([]);
 
   const form = useForm<z.infer<typeof tourSchema>>({
     resolver: zodResolver(tourSchema),
     defaultValues: {
       minGroupSize: "1",
+      category: "",
+      language: "",
     },
   });
 
-  // Fetch tour data for editing
+  // Fetch existing tour data
   useEffect(() => {
-    if (!tourId) return;
-
     const fetchTour = async () => {
+      if (!params.slug) return;
+
       try {
         setFetching(true);
-        const token = localStorage.getItem('accessToken');
-        
-        if (!token) {
-          toast.error("Please login first");
-          router.push('/login');
-          return;
+        let token: string | null = null;
+        if (typeof window !== 'undefined') {
+          token = localStorage.getItem('accessToken');
         }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour/edit/${tourId}`, {
-          method: "GET",
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          credentials: "include",
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/tour/${params.slug}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
 
         if (!res.ok) {
           if (res.status === 401) {
             toast.error("Session expired. Please login again.");
-            localStorage.clear();
-            router.push('/login');
+            if (typeof window !== 'undefined') {
+              localStorage.clear();
+              window.location.href = '/login';
+            }
             return;
           }
           throw new Error("Failed to fetch tour");
@@ -190,73 +230,66 @@ export default function EditTour() {
 
         const result = await res.json();
         
-        if (!result.success) {
-          throw new Error(result.message);
+        if (result.success && result.data) {
+          const tour = result.data;
+          
+          // Set form values
+          form.reset({
+            title: tour.title || "",
+            description: tour.description || "",
+            itinerary: tour.itinerary || "",
+            fee: tour.fee?.toString() || "",
+            duration: tour.duration || "",
+            meetingPoint: tour.meetingPoint || "",
+            maxGroupSize: tour.maxGroupSize?.toString() || "",
+            minGroupSize: tour.minGroupSize?.toString() || "1",
+            category: tour.category || "",
+            language: tour.tourLanguages?.map((l: any) => l.name).join(", ") || "",
+            city: tour.city || "",
+            country: tour.country || "",
+          });
+
+          // Set array states
+          setIncludes(tour.includes || []);
+          setExcludes(tour.excludes || []);
+          setTags(tour.tags || []);
+          setAvailableDays(tour.availableDays || []);
+          setExistingImages(tour.images?.map((img: any) => img.url) || []);
         }
-
-        const tour = result.data;
-        console.log("Tour data loaded:", tour);
-
-        // Set form values
-        form.reset({
-          title: tour.title || "",
-          description: tour.description || "",
-          itinerary: tour.itinerary || "",
-          fee: tour.fee?.toString() || "",
-          duration: tour.duration?.toString() || "",
-          meetingPoint: tour.meetingPoint || "",
-          maxGroupSize: tour.maxGroupSize?.toString() || "",
-          minGroupSize: tour.minGroupSize?.toString() || "1",
-          category: tour.category || "",
-          city: tour.city || "",
-          country: tour.country || "",
-        });
-
-        // Set array fields
-        setIncludes(tour.includes || []);
-        setExcludes(tour.excludes || []);
-        setWhatToBring(tour.whatToBring || []);
-        setRequirements(tour.requirements || []);
-        setTags(tour.tags || []);
-        setAvailableDays(tour.availableDays || []);
-        
-        // Set languages
-        const languages = tour.tourLanguages?.map((lang: any) => lang.language) || [];
-        setTourLanguages(languages);
-        
-        // Set existing images
-        const imageUrls = tour.tourImages?.map((img: any) => img.imageUrl) || [];
-        setExistingImages(imageUrls);
-
-      } catch (err: any) {
-        console.error('Fetch tour error:', err);
-        toast.error(err.message || "Failed to load tour");
-        router.push('/dashboard/guide/my-tours');
+      } catch (err) {
+        console.error('Fetch Tour Error:', err);
+        toast.error("Failed to load tour data");
       } finally {
         setFetching(false);
       }
     };
 
     fetchTour();
-  }, [tourId, router, form]);
+  }, [params.slug, form]);
 
   const onSubmit = async (values: z.infer<typeof tourSchema>) => {
     try {
       setLoading(true);
 
-      // Build payload to match backend
+      // Convert language string into array of objects
+      const tourLanguages = values.language
+        .split(",")
+        .map((l) => ({ name: l.trim() }))
+        .filter(l => l.name.length > 0);
+
+      // Build payload
       const payload = {
         ...values,
         fee: Number(values.fee),
         maxGroupSize: Number(values.maxGroupSize),
         minGroupSize: Number(values.minGroupSize),
-        tourLanguages: tourLanguages.map(lang => ({ language: lang })),
+        tourLanguages,
         availableDays,
         includes,
         excludes,
-        whatToBring,
-        requirements,
         tags,
+        // Keep existing images if no new ones uploaded
+        keepExistingImages: images.length === 0,
       };
 
       const formData = new FormData();
@@ -264,9 +297,6 @@ export default function EditTour() {
 
       // Append new images
       images.forEach((img) => formData.append("images", img));
-
-      // Append existing images
-      formData.append("existingImages", JSON.stringify(existingImages));
 
       // Get token
       let token: string | null = null;
@@ -277,7 +307,7 @@ export default function EditTour() {
       const headers: HeadersInit = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour/${tourId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour/${params.slug}`, {
         method: "PUT",
         headers,
         credentials: "include",
@@ -304,7 +334,6 @@ export default function EditTour() {
       if (result.success) {
         toast.success("Tour updated successfully!");
         router.push('/dashboard/guide/my-tours');
-        router.refresh();
       }
 
     } catch (err: any) {
@@ -317,429 +346,293 @@ export default function EditTour() {
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = form;
 
-  // Language Input Component
-  const LanguageInput = () => {
-    const [languageInput, setLanguageInput] = useState("");
-
-    const addLanguage = () => {
-      if (languageInput.trim() && !tourLanguages.includes(languageInput.trim())) {
-        setTourLanguages([...tourLanguages, languageInput.trim()]);
-        setLanguageInput("");
-      }
-    };
-
-    const removeLanguage = (index: number) => {
-      setTourLanguages(tourLanguages.filter((_, i) => i !== index));
-    };
-
-    return (
-      <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/50 space-y-3">
-        <div className="flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-lg text-blue-700">Tour Languages</h3>
-        </div>
-        <p className="text-sm text-gray-600">Languages you can conduct the tour in</p>
-        
-        <div className="flex gap-2">
-          <Input
-            value={languageInput}
-            onChange={(e) => setLanguageInput(e.target.value)}
-            placeholder="e.g., English, Bangla"
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addLanguage())}
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            onClick={addLanguage}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Language List */}
-        <div className="space-y-2">
-          {tourLanguages.map((lang, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between bg-white/80 p-2 rounded-lg border"
-            >
-              <span className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                {lang}
-              </span>
-              <button
-                type="button"
-                onClick={() => removeLanguage(index)}
-                className="text-red-500 hover:text-red-700"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-          
-          {tourLanguages.length === 0 && (
-            <p className="text-sm text-gray-500 text-center py-2">
-              No languages added yet. Click the + button to add.
-            </p>
-          )}
-        </div>
-
-        {/* Quick select buttons */}
-        <div className="flex flex-wrap gap-2 pt-2">
-          <p className="text-sm text-gray-600 w-full">Quick select:</p>
-          {languages.slice(0, 5).map((lang) => (
-            <button
-              key={lang}
-              type="button"
-              onClick={() => {
-                if (!tourLanguages.includes(lang)) {
-                  setTourLanguages([...tourLanguages, lang]);
-                }
-              }}
-              className="px-3 py-1 text-sm bg-white border border-blue-300 rounded-lg hover:bg-blue-50"
-            >
-              + {lang}
-            </button>
-          ))}
-        </div>
-      </div>
+  const handleDayToggle = (day: string) => {
+    setAvailableDays(prev =>
+      prev.includes(day)
+        ? prev.filter(d => d !== day)
+        : [...prev, day]
     );
   };
 
   if (fetching) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex justify-center items-center min-h-[60vh]">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-lg">Loading tour data...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading tour data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white p-4 md:p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/dashboard/guide/my-tours')}
-              className="p-2 hover:bg-blue-100 rounded-full"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">
-                Edit Tour
-              </h1>
-              <p className="text-gray-600">
-                Update your tour information to keep it current and attractive
-              </p>
+    <div className="bg-white shadow-xl rounded-2xl p-8 border border-blue-200">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Update Tour
+          </h1>
+          <p className="text-gray-600 mt-2">Edit your tour details</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="border-gray-300"
+        >
+          Cancel
+        </Button>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        
+        {/* Basic Information */}
+        <div className="p-6 rounded-xl bg-linear-to-br from-blue-50 to-purple-50 border border-blue-100">
+          <h2 className="text-xl font-bold text-blue-800 mb-4">Basic Information</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
+              <div>
+                <Input
+                  {...register("title")}
+                  placeholder="Tour Title: Sundarbans Wildlife Adventure"
+                  className="border-blue-300 focus:border-blue-500"
+                />
+                {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Input
+                    type="number"
+                    {...register("fee")}
+                    placeholder="Fee: 2500"
+                    className="border-blue-300 focus:border-blue-500"
+                  />
+                  {errors.fee && <p className="text-red-500 text-sm mt-1">{errors.fee.message}</p>}
+                </div>
+                <div>
+                  <Input
+                    {...register("duration")}
+                    placeholder="Duration: 5 Hours"
+                    className="border-blue-300 focus:border-blue-500"
+                  />
+                  {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Input
+                    {...register("maxGroupSize")}
+                    placeholder="Max Group: 20"
+                    type="number"
+                    className="border-blue-300 focus:border-blue-500"
+                  />
+                  {errors.maxGroupSize && <p className="text-red-500 text-sm mt-1">{errors.maxGroupSize.message}</p>}
+                </div>
+                <div>
+                  <Input
+                    {...register("minGroupSize")}
+                    placeholder="Min Group: 1"
+                    type="number"
+                    className="border-blue-300 focus:border-blue-500"
+                  />
+                  {errors.minGroupSize && <p className="text-red-500 text-sm mt-1">{errors.minGroupSize.message}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Input
+                  {...register("meetingPoint")}
+                  placeholder="Meeting Point: Bandarban Bus Station"
+                  className="border-blue-300 focus:border-blue-500"
+                />
+                {errors.meetingPoint && <p className="text-red-500 text-sm mt-1">{errors.meetingPoint.message}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Input
+                    {...register("city")}
+                    placeholder="City: Cox's Bazar"
+                    className="border-blue-300 focus:border-blue-500"
+                  />
+                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>}
+                </div>
+                <div>
+                  <Input
+                    {...register("country")}
+                    placeholder="Country: Bangladesh"
+                    className="border-blue-300 focus:border-blue-500"
+                  />
+                  {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>}
+                </div>
+              </div>
+
+              <div>
+                <Select
+                  value={watch("category")}
+                  onValueChange={(v) => setValue("category", v)}
+                >
+                  <SelectTrigger className="border-blue-300">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white shadow-xl rounded-2xl p-8 border border-blue-200">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            
-            {/* Basic Information */}
-            <div className="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-100">
-              <h2 className="text-xl font-bold text-blue-800 mb-4">Basic Information</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <div>
-                    <Input
-                      {...register("title")}
-                      placeholder="Tour Title: Sundarbans Wildlife Adventure"
-                      className="border-blue-300 focus:border-blue-500"
-                    />
-                    {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Input
-                        type="number"
-                        {...register("fee")}
-                        placeholder="Fee: 2500"
-                        className="border-blue-300 focus:border-blue-500"
-                      />
-                      {errors.fee && <p className="text-red-500 text-sm mt-1">{errors.fee.message}</p>}
-                    </div>
-                    <div>
-                      <Input
-                        {...register("duration")}
-                        placeholder="Duration: 5 Hours"
-                        className="border-blue-300 focus:border-blue-500"
-                      />
-                      {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Input
-                        {...register("maxGroupSize")}
-                        placeholder="Max Group: 20"
-                        type="number"
-                        className="border-blue-300 focus:border-blue-500"
-                      />
-                      {errors.maxGroupSize && <p className="text-red-500 text-sm mt-1">{errors.maxGroupSize.message}</p>}
-                    </div>
-                    <div>
-                      <Input
-                        {...register("minGroupSize")}
-                        placeholder="Min Group: 1"
-                        type="number"
-                        className="border-blue-300 focus:border-blue-500"
-                      />
-                      {errors.minGroupSize && <p className="text-red-500 text-sm mt-1">{errors.minGroupSize.message}</p>}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <Input
-                      {...register("meetingPoint")}
-                      placeholder="Meeting Point: Bandarban Bus Station"
-                      className="border-blue-300 focus:border-blue-500"
-                    />
-                    {errors.meetingPoint && <p className="text-red-500 text-sm mt-1">{errors.meetingPoint.message}</p>}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Input
-                        {...register("city")}
-                        placeholder="City: Cox's Bazar"
-                        className="border-blue-300 focus:border-blue-500"
-                      />
-                      {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>}
-                    </div>
-                    <div>
-                      <Input
-                        {...register("country")}
-                        placeholder="Country: Bangladesh"
-                        className="border-blue-300 focus:border-blue-500"
-                      />
-                      {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Select onValueChange={(v) => setValue("category", v)} defaultValue={watch("category")}>
-                      <SelectTrigger className="border-blue-300">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Descriptions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <label className="font-semibold text-blue-700">Description</label>
-                <Textarea
-                  {...register("description")}
-                  rows={6}
-                  placeholder="Detailed description of your tour..."
-                  className="border-blue-300 focus:border-blue-500"
-                />
-                {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
-              </div>
-              
-              <div className="space-y-4">
-                <label className="font-semibold text-blue-700">Itinerary</label>
-                <Textarea
-                  {...register("itinerary")}
-                  rows={6}
-                  placeholder="Detailed itinerary with timings..."
-                  className="border-blue-300 focus:border-blue-500"
-                />
-                {errors.itinerary && <p className="text-red-500 text-sm">{errors.itinerary.message}</p>}
-              </div>
-            </div>
-
-            {/* Language Input */}
-            <div className="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100">
-              <LanguageInput />
-            </div>
-
-            {/* Array Input Fields Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ArrayInputField
-                title="What's Included"
-                description="Services and items included in the price"
-                icon={CheckCircle}
-                items={includes}
-                onItemsChange={setIncludes}
-                placeholder="e.g., Local guide services, Entrance fees"
-                color="border-green-200 bg-green-50/50"
-              />
-
-              <ArrayInputField
-                title="What's Excluded"
-                description="Items and services not included in the price"
-                icon={XCircle}
-                items={excludes}
-                onItemsChange={setExcludes}
-                placeholder="e.g., Hotel pickup, Personal expenses"
-                color="border-red-200 bg-red-50/50"
-              />
-
-              <ArrayInputField
-                title="What to Bring"
-                description="Items travelers should bring"
-                icon={CheckCircle}
-                items={whatToBring}
-                onItemsChange={setWhatToBring}
-                placeholder="e.g., Comfortable shoes, Water bottle"
-                color="border-blue-200 bg-blue-50/50"
-              />
-
-              <ArrayInputField
-                title="Requirements"
-                description="Physical requirements and restrictions"
-                icon={CheckCircle}
-                items={requirements}
-                onItemsChange={setRequirements}
-                placeholder="e.g., Moderate fitness level, Minimum age"
-                color="border-amber-200 bg-amber-50/50"
-              />
-            </div>
-
-            {/* Additional Information */}
-            <div className="p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100">
-              <h2 className="text-xl font-bold text-purple-800 mb-4">Additional Information</h2>
-              
-              <div className="space-y-6">
-                {/* Tags */}
-                <div>
-                  <ArrayInputField
-                    title="Tags"
-                    description="Keywords for search"
-                    icon={CheckCircle}
-                    items={tags}
-                    onItemsChange={setTags}
-                    placeholder="e.g., adventure, sea, nature"
-                    color="border-purple-200 bg-purple-50/50"
-                  />
-                </div>
-
-                {/* Available Days */}
-                <div>
-                  <label className="block text-sm font-medium text-purple-700 mb-2">
-                    Available Days
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {daysOfWeek.map((day) => (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() => {
-                          if (availableDays.includes(day)) {
-                            setAvailableDays(availableDays.filter(d => d !== day));
-                          } else {
-                            setAvailableDays([...availableDays, day]);
-                          }
-                        }}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                          availableDays.includes(day)
-                            ? "bg-purple-600 text-white shadow-md"
-                            : "bg-white text-purple-600 border border-purple-300 hover:bg-purple-50"
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Images Upload */}
-            <div className="p-6 rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-100">
-              <h2 className="text-xl font-bold text-cyan-800 mb-4">Tour Images</h2>
-              
-              {/* Show existing images */}
-              {existingImages.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Existing Images</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {existingImages.map((url, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={url}
-                          alt={`Tour image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setExistingImages(existingImages.filter((_, i) => i !== index))}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">Add New Images</h3>
-              <ImageUpload onFilesChange={setImages} />
-              <p className="text-sm text-gray-600 mt-2">
-                Upload additional images for your tour
-              </p>
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-center gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push('/dashboard/guide/my-tours')}
-                disabled={loading}
-                className="px-8 py-6 text-lg rounded-xl"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="px-8 py-6 text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Updating Tour...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-5 w-5" />
-                    Update Tour
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
+        {/* Descriptions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="font-semibold text-blue-700">Description</label>
+            <Textarea
+              {...register("description")}
+              rows={6}
+              placeholder="Detailed description of your tour..."
+              className="border-blue-300 focus:border-blue-500"
+            />
+            {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+          </div>
+          
+          <div className="space-y-2">
+            <label className="font-semibold text-blue-700">Itinerary</label>
+            <Textarea
+              {...register("itinerary")}
+              rows={6}
+              placeholder="Detailed itinerary with timings..."
+              className="border-blue-300 focus:border-blue-500"
+            />
+            {errors.itinerary && <p className="text-red-500 text-sm">{errors.itinerary.message}</p>}
+          </div>
         </div>
-      </div>
+
+        {/* Language Input */}
+        <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/50">
+          <label className="font-semibold text-blue-700 block mb-2">Languages</label>
+          <p className="text-sm text-gray-600 mb-3">Enter languages separated by commas (e.g., English, Bangla, Hindi)</p>
+          <Input
+            {...register("language")}
+            placeholder="e.g., English, Bangla"
+            className="border-blue-300 focus:border-blue-500"
+          />
+          {errors.language && <p className="text-red-500 text-sm mt-1">{errors.language.message}</p>}
+        </div>
+
+        {/* Day Selection */}
+        <DaySelection
+          days={daysOfWeek}
+          selectedDays={availableDays}
+          onDayToggle={handleDayToggle}
+        />
+
+        {/* Array Input Fields Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ArrayInputField
+            title="What's Included"
+            description="Services and items included in the price"
+            icon={CheckCircle}
+            items={includes}
+            onItemsChange={setIncludes}
+            placeholder="e.g., Local guide services, Entrance fees"
+            color="border-green-200 bg-green-50/50"
+          />
+
+          <ArrayInputField
+            title="What's Excluded"
+            description="Items and services not included in the price"
+            icon={XCircle}
+            items={excludes}
+            onItemsChange={setExcludes}
+            placeholder="e.g., Hotel pickup, Personal expenses"
+            color="border-red-200 bg-red-50/50"
+          />
+        </div>
+
+        {/* Tags Input */}
+        <div className="p-4 rounded-xl border border-purple-200 bg-purple-50/50">
+          <div className="flex items-center gap-2 mb-3">
+            <Tag className="w-5 h-5 text-purple-600" />
+            <h3 className="font-semibold text-lg text-purple-800">Tags</h3>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">Add relevant tags to help travelers find your tour</p>
+          
+          <ArrayInputField
+            title=""
+            description=""
+            icon={Tag}
+            items={tags}
+            onItemsChange={setTags}
+            placeholder="e.g., Wildlife, Adventure, Photography"
+            color="border-purple-200 bg-transparent"
+          />
+        </div>
+
+        {/* Images Upload */}
+        <div className="p-6 rounded-xl bg-linear-to-br from-cyan-50 to-blue-50 border border-cyan-100">
+          <h2 className="text-xl font-bold text-cyan-800 mb-4">Tour Images</h2>
+          
+          {existingImages.length > 0 && (
+            <div className="mb-6">
+              <p className="text-sm text-gray-600 mb-3">Existing Images:</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {existingImages.map((url, index) => (
+                  <div key={index} className="relative rounded-lg overflow-hidden border">
+                    <img
+                      src={url}
+                      alt={`Tour image ${index + 1}`}
+                      className="w-full h-32 object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <p className="text-sm text-gray-600 mb-3">Upload new images to replace existing ones:</p>
+          <ImageUpload onFilesChange={setImages} />
+          <p className="text-sm text-gray-600 mt-2">
+            Upload high-quality images of your tour (Leave empty to keep existing images)
+          </p>
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-center gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            className="px-6 py-6 text-lg"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="px-8 py-6 text-lg font-semibold bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            {loading ? (
+              <>
+                <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Updating Tour...
+              </>
+            ) : (
+              "Update Tour"
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
