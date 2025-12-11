@@ -53,7 +53,7 @@ export default function MyBooking({ bookings }: { bookings: Booking[] }) {
   const totalBookings = bookings.length;
   const completedBookings = bookings.filter(b => b.status === "COMPLETED").length;
   const pendingBookings = bookings.filter(b => b.status === "PENDING").length;
-  const reviewedBookings = bookings.filter(b => b.tour.id).length;
+  const reviewedBookings = bookings.filter(b => b.hasReviewed).length;
 
  console.log("from bookings", bookings)
 
