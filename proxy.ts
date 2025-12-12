@@ -146,7 +146,7 @@ export async function proxy(request: NextRequest) {
         if (userRole) {
             const isAdminRoute = pathname.startsWith('/dashboard/admin');
             const isGuideRoute = pathname.startsWith('/dashboard/guide');
-            const isTouristRoute = pathname.startsWith('/dashboard/tourist');
+            const isTouristRoute = pathname.startsWith('/dashboard/profile');
             
             // Basic role checks - customize as needed
             if (isAdminRoute && userRole !== 'ADMIN') {

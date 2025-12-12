@@ -14,11 +14,10 @@ import { FormField, FormMessage, FormItem, FormLabel, FormControl, Form } from "
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import Password from "./Layout/Auth/Password"
 import Link from "next/link"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { 
   LogIn, 
   Eye, 
@@ -29,7 +28,6 @@ import {
   Sparkles,
   User,
   Shield,
-  MapPin
 } from "lucide-react"
 
 const formSchema = z.object({
@@ -37,13 +35,56 @@ const formSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 })
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+// Create an inner component that uses useSearchParams
+function LoginFormContent() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Get redirect from URL on client side
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const redirectParam = params.get('redirect')
+      
+      if (redirectParam) {
+        try {
+          const decoded = decodeURIComponent(redirectParam)
+          setRedirectUrl(decoded)
+          console.log('Redirect URL set to:', decoded)
+        } catch (error) {
+          console.error('Failed to decode redirect URL:', error)
+          setRedirectUrl(null)
+        }
+      }
+      
+      // Check if already logged in
+      const token = localStorage.getItem('accessToken')
+      const userRole = localStorage.getItem('userRole')
+      
+      if (token && userRole) {
+        console.log('Already logged in, redirecting...')
+        let targetUrl = '/dashboard'
+        if (redirectParam) {
+          try {
+            targetUrl = decodeURIComponent(redirectParam)
+          } catch {
+            // Fallback based on role
+            if (userRole === 'ADMIN') targetUrl = '/dashboard/admin'
+            else if (userRole === 'GUIDE') targetUrl = '/dashboard/guide'
+            else if (userRole === 'TOURIST') targetUrl = '/dashboard/profile'
+          }
+        } else {
+          if (userRole === 'ADMIN') targetUrl = '/dashboard/admin'
+          else if (userRole === 'GUIDE') targetUrl = '/dashboard/guide'
+          else if (userRole === 'TOURIST') targetUrl = '/dashboard/profile'
+        }
+        
+        router.replace(targetUrl)
+      }
+    }
+  }, [router])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,40 +115,46 @@ export function LoginForm({
       console.log('Login response:', data)
 
       if (data.status && data.data?.accessToken) {
-        // Store tokens in localStorage
+        // Clear any old auth data first
+        localStorage.clear()
+        sessionStorage.clear()
+        
+        // Store new tokens in localStorage
         localStorage.setItem('accessToken', data.data.accessToken)
-        localStorage.setItem('refreshToken', data.data.refreshToken || '')
+        if (data.data.refreshToken) {
+          localStorage.setItem('refreshToken', data.data.refreshToken)
+        }
         localStorage.setItem('userRole', data.data.user?.role || 'TOURIST')
         localStorage.setItem('user', JSON.stringify(data.data.user || {}))
         localStorage.setItem('loginTime', Date.now().toString())
         
-        // Also store in sessionStorage for immediate access
-        sessionStorage.setItem('token', data.data.accessToken)
-        sessionStorage.setItem('userRole', data.data.user?.role || 'TOURIST')
-
         toast.success(data.message || "Welcome back! Login successful!")
         
-        // Wait a moment to ensure storage is set before redirect
-        await new Promise(resolve => setTimeout(resolve, 100))
-        
-        // Redirect based on user role
         const userRole = data.data.user?.role || 'TOURIST'
         
-        let redirectUrl = '/dashboard'
-        switch(userRole.toUpperCase()) {
-          case 'ADMIN':
-            redirectUrl = '/dashboard/admin'
-            break
-          case 'GUIDE':
-            redirectUrl = '/dashboard/guide'
-            break
-          case 'TOURIST':
-            redirectUrl = '/dashboard/profile'
-            break
+        // Determine where to redirect
+        let targetUrl = '/dashboard'
+        if (redirectUrl) {
+          targetUrl = redirectUrl
+        } else {
+          // No redirect param, use role-based default
+          switch(userRole.toUpperCase()) {
+            case 'ADMIN':
+              targetUrl = '/dashboard/admin'
+              break
+            case 'GUIDE':
+              targetUrl = '/dashboard/guide'
+              break
+            case 'TOURIST':
+              targetUrl = '/dashboard/profile'
+              break
+          }
         }
         
-        console.log('Redirecting to:', redirectUrl)
-        window.location.href = redirectUrl
+        console.log('Login successful, redirecting to:', targetUrl)
+        
+        // Use window.location for a clean redirect
+        window.location.href = targetUrl
         
       } else {
         const errorMessage = data.message || "Login failed. Please check your credentials."
@@ -116,7 +163,7 @@ export function LoginForm({
     } catch (error: any) {
       console.error('Login error:', error)
       
-      if (error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
+      if (error.name === 'TypeError' || error.message?.includes('Failed to fetch')) {
         toast.error("Cannot connect to server. Please check your internet connection.")
       } else {
         toast.error("An unexpected error occurred. Please try again.")
@@ -127,7 +174,7 @@ export function LoginForm({
   }
 
   return (
-    <div className={cn("w-full", className)} {...props}>
+    <div className="w-full">
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-linear-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"></div>
@@ -266,14 +313,10 @@ export function LoginForm({
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
-            
             </div>
 
-         
-            
-
             {/* Sign Up Link */}
-            <div className="text-center  border-gray-100">
+            <div className="text-center border-gray-100">
               <p className="text-gray-600">
                 New to our platform?{" "}
                 <Link
@@ -297,5 +340,26 @@ export function LoginForm({
         </div>
       </div>
     </div>
+  )
+}
+
+// Main exported component with Suspense
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-4 text-gray-600">Loading login form...</p>
+        </div>
+      </div>
+    }>
+      <div className={cn("w-full", className)} {...props}>
+        <LoginFormContent />
+      </div>
+    </Suspense>
   )
 }

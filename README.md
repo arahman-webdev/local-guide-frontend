@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Travel & Tour Booking Backend
 
-## Getting Started
+# Overview: 
+A complete backend API for a Travel & Tour Booking Platform built using Node.js, Express, Prisma ORM, PostgreSQL, JWT Authentication, RBAC, SSLCommerz Payment Gateway, and Cloudinary for media uploads.
 
-First, run the development server:
+# Features
+🔐 Authentication & Authorization
 
-```bash
+Tourist, Guide, Admin roles
+
+Register, Login
+
+Access + Refresh tokens (HTTP-only cookies)
+
+Secure token rotation
+
+
+# Users
+
+View profile
+
+Update profile
+
+Admin: block/unblock users
+
+Guide: manage tours
+
+# Tours
+
+Create, update, delete (Guide/Admin)
+Upload multiple images
+List all tours with filters (price, date, category, language)
+Tour details by ID
+
+# Wishlist (Favorite Tours)
+
+Add to wishlist
+
+Remove from wishlist
+
+Get user wishlist
+
+# 📝 Booking System
+
+Create booking
+
+Validate guide availability
+
+Booking statuses:
+
+PENDING
+
+CONFIRMED
+
+CANCELLED
+
+ONGOING
+
+COMPLETED
+
+# 💳 Payment (SSLCommerz)
+
+Initiate payment
+
+User redirected to SSLCommerz "Pay Now" page
+
+Payment success webhook
+
+Payment failed/cancel callbacks
+
+Booking auto-update after payment
+
+# ☁️ Cloudinary
+
+Upload & delete tour images
+
+# 👮 Admin Functionalities
+
+Manage users
+
+Manage guides
+
+View site statistics
+
+Manage bookings
+
+# Tech Stack
+
+
+Technology Node.js Express.js Prisma ORM PostgreSQL / MySQL TypeScript Cloudinary JWT Secure
+
+# 🧩 Installation & Setup
+
+1 Clone the repository
+git clone https://github.com/arahman-webdev/local-guide-backend.git
+
+2 Install dependencies
+npm install
+
+3 Generate Prisma client
+npx prisma generate
+
+4 Run database migrations
+npx prisma migrate dev --name init
+
+5 Start the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Server runs on 👉 http://localhost:5000

@@ -15,7 +15,7 @@ function PaymentLoading() {
     <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-green-50 to-white">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading payment details...</p>
+        <p className="mt-4 text-gray-600">Loading payment success...</p>
       </div>
     </div>
   );
@@ -29,59 +29,23 @@ function PaymentSuccessContent() {
   const [loading, setLoading] = useState(true);
 
   const transactionId = searchParams.get('transactionId');
-  const bookingId = searchParams.get('bookingId');
+
+
 
   useEffect(() => {
-    if (bookingId) {
-      fetchBookingDetails();
-    } else {
-      setLoading(false);
-    }
-  }, [bookingId]);
+    const timer = setTimeout(() => setLoading(false), 2000); // 2 sec
+    return () => clearTimeout(timer);
+  }, []);
 
-  const fetchBookingDetails = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/${bookingId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        cache: 'no-store' // Add this for dynamic data
-      });
 
-      const result = await response.json();
-      if (result.success) {
-        setBookingDetails(result.data);
-      } else {
-        toast.error(result.message || 'Failed to fetch booking details');
-      }
-    } catch (error) {
-      console.error('Error fetching booking:', error);
-      toast.error('Failed to load booking details');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleDownloadReceipt = () => {
-    toast.info('Receipt download feature coming soon!');
-  };
 
-  const handleShareBooking = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Booking Confirmation',
-        text: `I've booked ${bookingDetails?.tour?.title} on TourHobe!`,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Booking link copied to clipboard!');
-    }
-  };
+
 
   if (loading) {
-    return <PaymentLoading />;
+    return (
+     <PaymentLoading />
+    );
   }
 
   return (
@@ -138,7 +102,7 @@ function PaymentSuccessContent() {
           ) : (
             <div className="bg-yellow-50 rounded-xl p-6 mb-8 text-center">
               <p className="text-yellow-800">
-                Booking details could not be loaded. Please check bookings email for confirmation.
+                Booking details could not be loaded. Please check bookings for confirmation.
               </p>
             </div>
           )}

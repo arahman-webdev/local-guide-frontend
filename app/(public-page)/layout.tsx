@@ -1,10 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/sharedComponent/Navbar";
 import Footer from "@/components/sharedComponent/Footer";
-
 
 
 const geistSans = Geist({
@@ -28,15 +28,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="antialiased">
+       
         <Navbar />
         <main>{children}</main>
         <Footer />
         <Toaster position="top-center" richColors />
-
       </body>
     </html>
   );
