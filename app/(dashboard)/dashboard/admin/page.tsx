@@ -349,25 +349,7 @@ export default function AdminDashboard() {
                                 Monitoring {stats.totalUsers} users, {stats.totalTours} tours, and {stats.totalBookings} bookings
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                            </div>
-                            <button className="p-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-xl">
-                                <Filter className="h-4 w-4 text-gray-600" />
-                            </button>
-                            <button
-                                onClick={fetchDashboardData}
-                                className="p-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-xl"
-                            >
-                                <Loader2 className={`h-4 w-4 text-gray-600 ${loading ? 'animate-spin' : ''}`} />
-                            </button>
-                        </div>
+                       
                     </div>
                     {error && (
                         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -655,7 +637,7 @@ export default function AdminDashboard() {
                                                 <div>
                                                     <div className="font-medium text-gray-900">{booking.tourTitle}</div>
                                                     <div className="text-sm text-gray-500">
-                                                        {booking.tourist} → {booking.guide}
+                                                        {booking.tourist} 
                                                     </div>
                                                 </div>
                                             </td>

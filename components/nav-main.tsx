@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export function NavMain({
   items,
@@ -22,6 +23,8 @@ export function NavMain({
     role?: string
   }[]
 }) {
+
+  const pathName = usePathname()
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -31,21 +34,22 @@ export function NavMain({
               tooltip="Quick Create"
               className=" text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
             >
-              
+
               <span className="text-[#BDC7D3] ml-3">MAIN HOME</span>
             </SidebarMenuButton>
-            
+
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <Link href={item.url}>
-              <SidebarMenuButton tooltip={item.title} className="hover:bg-[#EAF1FF] text-black hover:text-[#2275fc] font-semibold text-md p-5 cursor-pointer">
-                {item.icon && <item.icon />}
-                {item.title}
-              </SidebarMenuButton>
+                <SidebarMenuButton tooltip={item.title} className={`hover:bg-[#EAF1FF] ${pathName === item.url? "bg-[#EAF1FF] text-[#2275fc]":"text-black"}  hover:text-[#2275fc] font-semibold text-md p-5 cursor-pointer`}>
+                  {item.icon && <item.icon />}
+                  {item.title}
+                </SidebarMenuButton>
               </Link>
+
             </SidebarMenuItem>
           ))}
         </SidebarMenu>

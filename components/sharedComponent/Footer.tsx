@@ -1,79 +1,120 @@
-// components/layout/ModernFooter.tsx
-import Link from 'next/link';
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { 
   Facebook, 
-  Twitter, 
   Instagram, 
+  Twitter, 
   Youtube, 
   Mail, 
   Phone, 
   MapPin, 
-  ChevronRight,
-  Sparkles,
-  Compass,
+  Globe, 
+  Shield, 
+  Users,
+  Calendar,
   Heart
-} from 'lucide-react';
+} from "lucide-react";
 
-export default function Footer() {
-  const currentYear = new Date().getFullYear();
+const Footer = () => {
+  const pathname = usePathname();
+
+  const isActive = (path: string) => {
+    return pathname === path;
+  };
 
   return (
-    <footer className="relative overflow-hidden bg-linear-to-br from-blue-600/20 via-cyan-600/10 to-purple-900/20">
-      {/* Background linear */}
-      {/* <div className="absolute inset-0 "></div>
-      <div className="absolute inset-0 bg-[url('/https://i.ibb.co.com/4R4QVL3n/login.jpg')] opacity-15"></div> */}
-      
-      {/* Main Content */}
-      <div className="relative max-w-7xl mx-auto px-4 py-16 lg:py-20">
-        {/* Logo & Tagline */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg--to-br from-blue-500 to-cyan-400 rounded-2xl flex items-center justify-center shadow-lg">
-              <Compass className="h-6 w-6 text-white" />
+    <footer className="bg-linear-to-b from-gray-900 to-black text-white">
+      {/* Newsletter Section */}
+      <div className="bg-linear-to-r from-blue-900 to-purple-900 py-12 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-center md:text-left">
+              <h3 className="text-2xl font-bold mb-2">Stay Updated</h3>
+              <p className="text-gray-300">Subscribe to our newsletter for tour updates and travel tips</p>
             </div>
-            <h2 className="text-3xl font-bold bg-linear-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent">
-              LocalExplorer
-            </h2>
+            <div className="w-full md:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  placeholder="Your email address"
+                  className="px-6 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
+                />
+                <button className="px-8 py-3 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                  Subscribe
+                </button>
+              </div>
+              <p className="text-sm text-gray-400 mt-3 text-center md:text-left">
+                By subscribing, you agree to our Privacy Policy
+              </p>
+            </div>
           </div>
-          <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-            Discover authentic experiences with passionate local guides worldwide
-          </p>
         </div>
+      </div>
 
-        {/* Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-          {/* Company */}
-          <div className="lg:col-span-2">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-cyan-300" />
-              About Us
-            </h3>
-            <p className="text-gray-300 mb-6 leading-relaxed">
-              We're on a mission to connect travelers with authentic local experiences. 
-              Our platform empowers local guides to share their culture and knowledge.
+      {/* Main Footer */}
+      <div className="container mx-auto px-4 py-12 lg:py-16 max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+          
+          {/* Brand & About */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 bg-linear-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold bg-linear-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+                  TourGuide Pro
+                </h2>
+                <p className="text-sm text-gray-400">Authentic Experiences</p>
+              </div>
+            </div>
+            
+            <p className="text-gray-400 leading-relaxed">
+              Connecting passionate travelers with expert local guides for unforgettable adventures and authentic cultural experiences worldwide.
             </p>
-            <div className="flex gap-3">
-              <button className="px-4 py-2 bg-linear-to-r from-blue-600 to-cyan-500 rounded-lg font-medium hover:shadow-lg transition-all">
-                Start Exploring
-              </button>
-              <button className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg font-medium hover:bg-white/20 transition-all">
-                Meet Our Guides
-              </button>
+            
+            <div className="pt-4">
+              <div className="flex items-center gap-2 text-gray-400 mb-2">
+                <Shield className="h-5 w-5 text-green-400" />
+                <span className="text-sm">Verified Guides • Secure Payments</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-400">
+                <Users className="h-5 w-5 text-blue-400" />
+                <span className="text-sm">24/7 Customer Support</span>
+              </div>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-6">For Travelers</h3>
+            <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-800 flex items-center gap-2">
+              <span className="bg-linear-to-r from-cyan-500 to-blue-600 p-2 rounded-lg">
+                <Calendar className="h-4 w-4" />
+              </span>
+              Explore Tours
+            </h3>
             <ul className="space-y-3">
-              {['Browse Tours', 'Destinations', 'Travel Tips', 'Gift Cards', 'Group Travel'].map((item) => (
-                <li key={item}>
+              {[
+                { href: "/tours/adventure", label: "Adventure Tours" },
+                { href: "/tours/cultural", label: "Cultural Experiences" },
+                { href: "/tours/food", label: "Food & Culinary" },
+                { href: "/tours/nature", label: "Nature & Wildlife" },
+                { href: "/tours/historical", label: "Historical Sites" },
+                { href: "/tours/custom", label: "Custom Tours" },
+              ].map((link) => (
+                <li key={link.href}>
                   <Link
-                    href="#"
-                    className="text-gray-300 hover:text-cyan-300 transition-colors flex items-center gap-2 group"
+                    href={link.href}
+                    className={`flex items-center gap-2 transition-all ${
+                      isActive(link.href)
+                        ? "text-cyan-300 font-medium"
+                        : "text-gray-400 hover:text-white hover:translate-x-1"
+                    }`}
                   >
-                    <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    {item}
+                    <div className="h-1 w-1 rounded-full bg-gray-600"></div>
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -82,96 +123,146 @@ export default function Footer() {
 
           {/* For Guides */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-6">For Guides</h3>
+            <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-800 flex items-center gap-2">
+              <span className="bg-linear-to-r from-purple-500 to-pink-600 p-2 rounded-lg">
+                <Users className="h-4 w-4" />
+              </span>
+              For Guides
+            </h3>
             <ul className="space-y-3">
-              {['Become a Guide', 'Guide Resources', 'Success Stories', 'Safety Guide', 'FAQ'].map((item) => (
-                <li key={item}>
+              {[
+                { href: "/become-guide", label: "Become a Guide" },
+                { href: "/guide/dashboard", label: "Guide Dashboard" },
+                { href: "/guide/resources", label: "Resources" },
+                { href: "/guide/community", label: "Guide Community" },
+                { href: "/guide/pricing", label: "Pricing & Commission" },
+                { href: "/guide/support", label: "Guide Support" },
+              ].map((link) => (
+                <li key={link.href}>
                   <Link
-                    href="#"
-                    className="text-gray-300 hover:text-cyan-300 transition-colors flex items-center gap-2 group"
+                    href={link.href}
+                    className={`flex items-center gap-2 transition-all ${
+                      isActive(link.href)
+                        ? "text-purple-300 font-medium"
+                        : "text-gray-400 hover:text-white hover:translate-x-1"
+                    }`}
                   >
-                    <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    {item}
+                    <div className="h-1 w-1 rounded-full bg-gray-600"></div>
+                    {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact & Support */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-6">Get in Touch</h3>
+            <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-800">Contact Us</h3>
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-linear-to-br from-blue-500/20 to-cyan-400/20 rounded-xl flex items-center justify-center">
-                  <Mail className="h-5 w-5 text-cyan-300" />
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-linear-to-r from-cyan-500 to-blue-600 rounded-lg">
+                  <Mail className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Email</p>
-                  <p className="text-white font-medium">hello@localexplorer.com</p>
+                  <p className="font-medium">Email Support</p>
+                  <a href="mailto:support@tourguide.com" className="text-gray-400 hover:text-cyan-300 transition-colors">
+                    support@tourguide.com
+                  </a>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-linear-to-br from-blue-500/20 to-cyan-400/20 rounded-xl flex items-center justify-center">
-                  <Phone className="h-5 w-5 text-cyan-300" />
+
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-linear-to-r from-purple-500 to-pink-600 rounded-lg">
+                  <Phone className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Support</p>
-                  <p className="text-white font-medium">+1 (555) 123-4567</p>
+                  <p className="font-medium">Phone Support</p>
+                  <a href="tel:+8801234567890" className="text-gray-400 hover:text-cyan-300 transition-colors">
+                    +880 1234 567890
+                  </a>
                 </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg">
+                  <MapPin className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="font-medium">Office Location</p>
+                  <p className="text-gray-400">Dhaka, Bangladesh</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Media */}
+            <div className="mt-8 pt-6 border-t border-gray-800">
+              <p className="text-gray-400 mb-4">Follow Us</p>
+              <div className="flex items-center gap-3">
+                {[
+                  { icon: Facebook, label: "Facebook", color: "hover:bg-blue-600" },
+                  { icon: Instagram, label: "Instagram", color: "hover:bg-pink-600" },
+                  { icon: Twitter, label: "Twitter", color: "hover:bg-sky-500" },
+                  { icon: Youtube, label: "YouTube", color: "hover:bg-red-600" },
+                ].map((social) => (
+                  <a
+                    key={social.label}
+                    href="#"
+                    className={`p-3 bg-gray-800 hover:scale-110 transition-all duration-300 rounded-lg ${social.color}`}
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-5 w-5" />
+                  </a>
+                ))}
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Divider */}
-        <div className="h-px bg-linear-to-r from-transparent via-gray-700 to-transparent my-8"></div>
+      {/* Bottom Bar */}
+      <div className="border-t border-gray-800">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} TourGuide Pro. All rights reserved.
+            </div>
+            
+            <div className="flex items-center gap-1 text-sm text-gray-500">
+              Made with
+              <Heart className="h-4 w-4 text-red-500 animate-pulse" />
+              in Bangladesh
+            </div>
 
-        {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Copyright */}
-          <div className="text-gray-400">
-            © {currentYear} LocalExplorer. Made with <Heart className="inline h-4 w-4 text-pink-400" /> for travelers.
-          </div>
-
-          {/* Social Links */}
-          <div className="flex gap-4">
-            {[
-              { icon: <Facebook className="h-5 w-5" />, label: 'Facebook' },
-              { icon: <Twitter className="h-5 w-5" />, label: 'Twitter' },
-              { icon: <Instagram className="h-5 w-5" />, label: 'Instagram' },
-              { icon: <Youtube className="h-5 w-5" />, label: 'YouTube' },
-            ].map((social) => (
-              <a
-                key={social.label}
-                href="#"
-                aria-label={social.label}
-                className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center transition-all hover:scale-110"
-              >
-                <span className="text-gray-300 hover:text-white transition-colors">
-                  {social.icon}
-                </span>
-              </a>
-            ))}
-          </div>
-
-          {/* Legal Links */}
-          <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-            <Link href="/privacy" className="hover:text-cyan-300 transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-cyan-300 transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/cookies" className="hover:text-cyan-300 transition-colors">
-              Cookies
-            </Link>
-            <Link href="/accessibility" className="hover:text-cyan-300 transition-colors">
-              Accessibility
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+              <Link href="/privacy" className="text-gray-500 hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="text-gray-500 hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="/cookies" className="text-gray-500 hover:text-white transition-colors">
+                Cookie Policy
+              </Link>
+              <Link href="/sitemap" className="text-gray-500 hover:text-white transition-colors">
+                Sitemap
+              </Link>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Back to Top */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-6 right-6 p-3 bg-linear-to-r from-cyan-500 to-blue-600 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 z-50"
+        aria-label="Back to top"
+      >
+        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+      </button>
     </footer>
   );
-}
+};
+
+export default Footer;

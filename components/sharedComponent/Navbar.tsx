@@ -47,7 +47,7 @@ export default function Navbar() {
                 ? [
                     { name: "Home", href: "/" },
                     { name: "Explore Tours", href: "/tours" },
-                    { name: "Dashboard", href: "/dashboard" },
+                    { name: "Dashboard", href: "/dashboard/guide" },
                     { name: "Profile", href: "/dashboard/profile" },
                 ]
                 : [
@@ -59,10 +59,8 @@ export default function Navbar() {
         : [
             { name: "Home", href: "/" },
             { name: "Explore Tours", href: "/tours" },
-            { name: "Become a Guide", href: "/register?role=guide" },
             { name: "About", href: "/about" },
-            { name: "Blog", href: "/blog" },
-            { name: "Contact", href: "/contact" },
+
 
         ];
 

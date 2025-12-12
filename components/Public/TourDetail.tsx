@@ -1,4 +1,3 @@
-// app/tours/[slug]/page.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -27,13 +26,20 @@ import {
     ChevronRight,
     ChevronLeft,
     CreditCard,
-    AlertCircle
+    AlertCircle,
+    X,
+    ThumbsUp,
+    User,
+    Calendar as CalendarIcon,
+    MessageSquare,
+    Star as StarIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 
 interface TourDetail {
     id: string;
@@ -43,13 +49,17 @@ interface TourDetail {
     fee: number;
     duration: string | number;
     maxGroupSize: number;
+    minGroupSize: number;
     category: string;
     city: string;
     country: string;
     meetingPoint: string;
     includes: string[];
+    excludes: string[];
+    whatToBring: string[];
     requirements: string[];
     languages: string[];
+    availableDays: string[];
     tourImages: Array<{
         id: string;
         imageUrl: string;
@@ -66,50 +76,60 @@ interface TourDetail {
         verified: boolean;
         languages: string[];
     };
-    rating: number;
-    totalReviews: number;
+    averageRating: number;
+    reviewCount: number;
     createdAt: string;
     updatedAt: string;
+}
+
+interface Review {
+    id: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+    user: {
+        id: string;
+        name: string;
+        profilePic: string;
+    };
 }
 
 export default function TourDetail() {
     const params = useParams();
     const router = useRouter();
     const [tour, setTour] = useState<TourDetail | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [selectedStartTime, setSelectedStartTime] = useState<string>('');
     const [selectedEndTime, setSelectedEndTime] = useState<string>('');
     const [participants, setParticipants] = useState(1);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
-    const [activeTab, setActiveTab] = useState<'details' | 'reviews' | 'host'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'reviews' | 'host' | 'exclusions'>('details');
     const [bookingLoading, setBookingLoading] = useState(false);
+    const [reviewComment, setReviewComment] = useState('');
+    const [reviewRating, setReviewRating] = useState(5);
+    const [submittingReview, setSubmittingReview] = useState(false);
+    const [showReviewForm, setShowReviewForm] = useState(false);
+    const [userHasBooked, setUserHasBooked] = useState(false);
 
-    // Available time slots (30-minute intervals from 8 AM to 8 PM)
-    // Helper to convert 24h to 12h format - DEFINE THIS FIRST
-    // Helper to convert 24h to 12h format - DEFINE THIS FIRST
+    // Helper to convert 24h to 12h format
     const convertTo12Hour = (time24: string) => {
-        // Add validation
         if (!time24 || typeof time24 !== 'string') {
-            console.error('Invalid time24 input:', time24);
             return 'Invalid Time';
         }
         
         const parts = time24.split(':');
-        console.log('Time24:', time24, 'Parts:', parts); // Debug log
-        
         if (parts.length !== 2) {
-            console.error('Invalid time format:', time24);
             return 'Invalid Time';
         }
         
         const hours = parseInt(parts[0], 10);
         const minutes = parseInt(parts[1], 10);
         
-        // Validate numbers
         if (isNaN(hours) || isNaN(minutes)) {
-            console.error('Invalid numbers in time:', time24, hours, minutes);
             return 'Invalid Time';
         }
         
@@ -118,13 +138,13 @@ export default function TourDetail() {
         return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
     };
 
-    // Available time slots (30-minute intervals from 8 AM to 8 PM)
+    // Generate time slots
     const generateTimeSlots = () => {
         const slots = [];
         for (let hour = 8; hour <= 20; hour++) {
             for (let minute = 0; minute < 60; minute += 30) {
                 const time24 = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                const time12 = convertTo12Hour(time24); // Now this works
+                const time12 = convertTo12Hour(time24);
                 slots.push({ value: time24, label: time12 });
             }
         }
@@ -139,7 +159,6 @@ export default function TourDetail() {
 
         try {
             let durationHours: number;
-
             if (typeof tour.duration === 'string') {
                 const match = tour.duration.match(/\d+/);
                 durationHours = match ? parseInt(match[0], 10) : 3;
@@ -149,7 +168,6 @@ export default function TourDetail() {
 
             const [hours, minutes] = startTime.split(':').map(Number);
             const totalMinutes = hours * 60 + minutes + (durationHours * 60);
-
             const endHours = Math.floor(totalMinutes / 60);
             const endMinutes = totalMinutes % 60;
 
@@ -168,16 +186,28 @@ export default function TourDetail() {
         }
     }, [selectedStartTime, tour?.duration]);
 
-    // Fetch tour data
+    // Fetch tour data and reviews
     useEffect(() => {
-        const fetchTour = async () => {
+        const fetchTourData = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour/${params.slug}`);
-                const data = await response.json();
+                // Fetch tour details
+                const tourResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tour/${params.slug}`);
+                const tourData = await tourResponse.json();
 
-                if (data.success) {
-                    setTour(data.data);
+                if (tourData.success) {
+                    setTour(tourData.data);
+                    
+                    // Fetch reviews for this tour
+                    const reviewsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/${tourData.data.id}`);
+                    const reviewsData = await reviewsResponse.json();
+                    
+                    if (reviewsData.success) {
+                        setReviews(reviewsData.data || []);
+                    }
+                    
+                    // Check if user has booked this tour (for review eligibility)
+                    checkUserBooking(tourData.data.id);
                 } else {
                     setError('Tour not found');
                 }
@@ -190,9 +220,34 @@ export default function TourDetail() {
         };
 
         if (params.slug) {
-            fetchTour();
+            fetchTourData();
         }
     }, [params.slug]);
+
+    // Check if current user has booked this tour
+    const checkUserBooking = async (tourId: string) => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return;
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/user`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                const hasBooked = result.data.some((booking: any) => 
+                    booking.tourId === tourId && 
+                    booking.status === 'COMPLETED'
+                );
+                setUserHasBooked(hasBooked);
+            }
+        } catch (error) {
+            console.error('Error checking user booking:', error);
+        }
+    };
 
     // Calculate next available dates
     const getAvailableDates = () => {
@@ -211,7 +266,6 @@ export default function TourDetail() {
     // Handle booking request
     const handleBookingRequest = async () => {
         try {
-            // Validation
             if (!selectedDate) {
                 toast.error('Please select a date');
                 return;
@@ -227,7 +281,6 @@ export default function TourDetail() {
                 return;
             }
 
-            // Check if user is logged in
             const token = localStorage.getItem('accessToken');
             if (!token) {
                 toast.error('Please login to book this tour');
@@ -236,18 +289,9 @@ export default function TourDetail() {
             }
 
             setBookingLoading(true);
-           
 
-            // Convert to ISO string
             const startTimeISO = `${selectedDate}T${selectedStartTime}:00Z`;
             const endTimeISO = `${selectedDate}T${selectedEndTime || calculateEndTime(selectedStartTime)}:00Z`;
-
-            console.log('Booking details:', {
-                tourId: tour.id,
-                startTime: startTimeISO,
-                endTime: endTimeISO,
-                participants
-            });
 
             const bookingData = {
                 tourId: tour.id,
@@ -266,9 +310,6 @@ export default function TourDetail() {
             });
 
             const result = await response.json();
-           
-
-            console.log('Booking response:', result);
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -282,18 +323,15 @@ export default function TourDetail() {
 
             if (result.success && result.data) {
                 if (result.data.paymentUrl) {
-                    // Success with payment URL
                     toast.success('Booking Created!', {
                         description: `Booking Code: ${result.data.booking?.bookingCode || 'N/A'}`,
                         duration: 3000,
                     });
 
-                    // Redirect to payment after delay
                     setTimeout(() => {
                         window.location.href = result.data.paymentUrl;
                     }, 2000);
                 } else {
-                    // Success without payment
                     toast.success('Booking Confirmed!', {
                         description: `Booking Code: ${result.data.booking?.bookingCode || 'Success'}`,
                         action: result.data.booking?.id ? {
@@ -302,7 +340,6 @@ export default function TourDetail() {
                         } : undefined
                     });
 
-                    // Reset form
                     setSelectedDate('');
                     setSelectedStartTime('');
                     setSelectedEndTime('');
@@ -333,12 +370,104 @@ export default function TourDetail() {
         }
     };
 
+    // Handle review submission
+    const handleSubmitReview = async () => {
+        try {
+            if (!reviewComment.trim()) {
+                toast.error('Please write a review');
+                return;
+            }
+
+            if (!tour?.id) {
+                toast.error('No tour selected');
+                return;
+            }
+
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                toast.error('Please login to submit a review');
+                router.push(`/login?redirect=/tours/${params.slug}`);
+                return;
+            }
+
+            setSubmittingReview(true);
+
+            const reviewData = {
+                tourId: tour.id,
+                rating: reviewRating,
+                comment: reviewComment
+            };
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/${tour.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(reviewData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    toast.error('Session expired. Please login again.');
+                    localStorage.clear();
+                    router.push('/login');
+                    return;
+                }
+                throw new Error(result.message || 'Failed to submit review');
+            }
+
+            if (result.success) {
+                toast.success('Review submitted successfully!');
+                
+                // Refresh reviews
+                const reviewsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/${tour.id}`);
+                const reviewsData = await reviewsResponse.json();
+                
+                if (reviewsData.success) {
+                    setReviews(reviewsData.data || []);
+                }
+                
+                // Reset form
+                setReviewComment('');
+                setReviewRating(5);
+                setShowReviewForm(false);
+            } else {
+                throw new Error(result.message || 'Failed to submit review');
+            }
+
+        } catch (error: any) {
+            console.error('Review submission error:', error);
+            toast.error('Failed to submit review', {
+                description: error.message || 'Please try again'
+            });
+        } finally {
+            setSubmittingReview(false);
+        }
+    };
+
     // Calculate total price
     const calculateTotal = () => {
         if (!tour) return 0;
         const basePrice = tour.fee * participants;
         const serviceFee = basePrice * 0.1;
         return (basePrice + serviceFee).toFixed(2);
+    };
+
+    // Render star rating
+    const renderStars = (rating: number) => {
+        return (
+            <div className="flex items-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <StarIcon
+                        key={star}
+                        className={`w-4 h-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`}
+                    />
+                ))}
+            </div>
+        );
     };
 
     if (loading) {
@@ -365,7 +494,7 @@ export default function TourDetail() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50  ">
             {/* Hero Image Gallery */}
             <div className="relative h-[60vh] md:h-[70vh] overflow-hidden">
                 {tour.tourImages.length > 0 ? (
@@ -377,7 +506,6 @@ export default function TourDetail() {
                             className="object-cover"
                             priority
                         />
-                        {/* Image Navigation */}
                         {tour.tourImages.length > 1 && (
                             <>
                                 <button
@@ -397,7 +525,6 @@ export default function TourDetail() {
                                     <ChevronRight className="h-6 w-6" />
                                 </button>
 
-                                {/* Image Dots */}
                                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
                                     {tour.tourImages.map((_, index) => (
                                         <button
@@ -414,12 +541,11 @@ export default function TourDetail() {
                         )}
                     </div>
                 ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <div className="h-full w-full bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
                         <Camera className="h-24 w-24 text-white/50" />
                     </div>
                 )}
 
-                {/* Back Button */}
                 <button
                     onClick={() => window.history.back()}
                     className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all"
@@ -427,9 +553,8 @@ export default function TourDetail() {
                     <ArrowLeft className="h-5 w-5" />
                 </button>
 
-                {/* Action Buttons */}
                 <div className="absolute top-6 right-6 flex gap-2">
-                    <button className="bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all">
+                    <button  className="bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all">
                         <Heart className="h-5 w-5" />
                     </button>
                     <button className="bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all">
@@ -437,7 +562,6 @@ export default function TourDetail() {
                     </button>
                 </div>
 
-                {/* Category Badge */}
                 <div className="absolute bottom-6 left-6">
                     <Badge className="bg-white/90 backdrop-blur-sm text-gray-800 border-0 px-4 py-2 text-sm font-medium">
                         {tour.category}
@@ -447,9 +571,7 @@ export default function TourDetail() {
 
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Left Column - Main Content */}
                     <div className="lg:col-span-2">
-                        {/* Header */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -459,7 +581,6 @@ export default function TourDetail() {
                                 {tour.title}
                             </h1>
 
-                            {/* Location & Rating */}
                             <div className="flex flex-wrap items-center gap-4 mb-6">
                                 <div className="flex items-center gap-2 text-gray-600">
                                     <MapPin className="h-5 w-5 text-blue-500" />
@@ -467,8 +588,8 @@ export default function TourDetail() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                                    <span className="font-bold text-gray-900">{tour.rating || 4.8}</span>
-                                    <span className="text-gray-600">({tour.totalReviews || 128} reviews)</span>
+                                    <span className="font-bold text-gray-900">{tour.averageRating || 4.8}</span>
+                                    <span className="text-gray-600">({tour.reviewCount || 0} reviews)</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-gray-600">
                                     <Shield className="h-5 w-5 text-green-500" />
@@ -476,7 +597,6 @@ export default function TourDetail() {
                                 </div>
                             </div>
 
-                            {/* Quick Stats */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                                 <div className="bg-white p-4 rounded-xl shadow-sm border">
                                     <div className="flex items-center gap-2 mb-2">
@@ -501,7 +621,7 @@ export default function TourDetail() {
                                 </div>
                                 <div className="bg-white p-4 rounded-xl shadow-sm border">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Calendar className="h-5 w-5 text-blue-500" />
+                                        <CalendarIcon className="h-5 w-5 text-blue-500" />
                                         <span className="font-medium">Flexible</span>
                                     </div>
                                     <p className="text-2xl font-bold text-gray-900">Book Now</p>
@@ -509,12 +629,12 @@ export default function TourDetail() {
                             </div>
                         </motion.div>
 
-                        {/* Navigation Tabs */}
                         <div className="border-b border-gray-200 mb-8">
                             <nav className="flex space-x-8">
                                 {[
                                     { id: 'details', label: 'Tour Details' },
-                                    { id: 'reviews', label: `Reviews (${tour.totalReviews || 0})` },
+                                    { id: 'exclusions', label: 'Inclusions & Exclusions' },
+                                    { id: 'reviews', label: `Reviews (${tour.reviewCount || 0})` },
                                     { id: 'host', label: 'Your Host' }
                                 ].map((tab) => (
                                     <button
@@ -531,7 +651,6 @@ export default function TourDetail() {
                             </nav>
                         </div>
 
-                        {/* Tab Content - Same as before, shortened for brevity */}
                         <AnimatePresence mode="wait">
                             {activeTab === 'details' && (
                                 <motion.div
@@ -541,7 +660,6 @@ export default function TourDetail() {
                                     exit={{ opacity: 0, y: -20 }}
                                     transition={{ duration: 0.3 }}
                                 >
-                                    {/* Description */}
                                     <div className="mb-8">
                                         <h3 className="text-2xl font-bold text-gray-900 mb-4">About this experience</h3>
                                         <p className="text-gray-700 leading-relaxed whitespace-pre-line">
@@ -549,8 +667,7 @@ export default function TourDetail() {
                                         </p>
                                     </div>
 
-                                    {/* Meeting Point */}
-                                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 mb-8">
+                                    <div className="bg-linear-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 mb-8">
                                         <h4 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
                                             <MapPin className="h-5 w-5 text-blue-600" />
                                             Meeting Point
@@ -558,20 +675,80 @@ export default function TourDetail() {
                                         <p className="text-gray-700">{tour.meetingPoint}</p>
                                     </div>
 
+                                    {tour.whatToBring && tour.whatToBring.length > 0 && (
+                                        <div className="mb-8">
+                                            <h4 className="text-xl font-bold text-gray-900 mb-4">What to Bring</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {tour.whatToBring.map((item, index) => (
+                                                    <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                                                        <Check className="h-5 w-5 text-blue-500 shrink-0" />
+                                                        <span className="text-gray-700">{item}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {tour.requirements && tour.requirements.length > 0 && (
+                                        <div className="mb-8">
+                                            <h4 className="text-xl font-bold text-gray-900 mb-4">Requirements</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {tour.requirements.map((item, index) => (
+                                                    <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                                                        <Check className="h-5 w-5 text-blue-500 shrink-0" />
+                                                        <span className="text-gray-700">{item}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
+
+                            {activeTab === 'exclusions' && (
+                                <motion.div
+                                    key="exclusions"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                >
                                     {/* What's Included */}
                                     <div className="mb-8">
-                                        <h4 className="text-xl font-bold text-gray-900 mb-4">What's Included</h4>
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="p-2 bg-green-100 rounded-lg">
+                                                <Check className="h-6 w-6 text-green-600" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-gray-900">What's Included</h3>
+                                                <p className="text-gray-600">All these are covered in your tour fee</p>
+                                            </div>
+                                        </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {(tour.includes || [
-                                                'Local guide services',
-                                                'All entrance fees',
-                                                'Bottled water',
-                                                'Traditional snacks',
-                                                'Transportation during tour',
-                                                'Souvenir photos'
-                                            ]).map((item, index) => (
-                                                <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                                            {tour.includes?.map((item, index) => (
+                                                <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-green-100">
                                                     <Check className="h-5 w-5 text-green-500 shrink-0" />
+                                                    <span className="text-gray-700">{item}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* What's Excluded */}
+                                    <div className="mb-8">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="p-2 bg-red-100 rounded-lg">
+                                                <X className="h-6 w-6 text-red-600" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-gray-900">What's Excluded</h3>
+                                                <p className="text-gray-600">These are not covered in your tour fee</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {tour.excludes?.map((item, index) => (
+                                                <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-100">
+                                                    <X className="h-5 w-5 text-red-500 shrink-0" />
                                                     <span className="text-gray-700">{item}</span>
                                                 </div>
                                             ))}
@@ -579,6 +756,156 @@ export default function TourDetail() {
                                     </div>
                                 </motion.div>
                             )}
+
+                            {activeTab === 'reviews' && (
+                                <motion.div
+                                    key="reviews"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="space-y-8"
+                                >
+                                    {/* Review Summary */}
+                                    <div className="bg-white rounded-2xl p-6 border">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-gray-900">Reviews</h3>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+                                                    <span className="text-3xl font-bold">{tour.averageRating?.toFixed(1) || '4.8'}</span>
+                                                    <span className="text-gray-600">· {tour.reviewCount || 0} reviews</span>
+                                                </div>
+                                            </div>
+                                            {userHasBooked && (
+                                                <Button
+                                                    onClick={() => setShowReviewForm(true)}
+                                                    className="bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600"
+                                                >
+                                                    <MessageSquare className="h-4 w-4 mr-2" />
+                                                    Write a Review
+                                                </Button>
+                                            )}
+                                        </div>
+
+                                        {/* Review Form Modal */}
+                                    
+                                            <div className="mb-6 p-6 bg-gray-50 rounded-xl border">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <h4 className="text-lg font-bold text-gray-900">Write a Review</h4>
+                                                    <button
+                                                        onClick={() => setShowReviewForm(false)}
+                                                        className="text-gray-500 hover:text-gray-700"
+                                                    >
+                                                        <X className="h-5 w-5" />
+                                                    </button>
+                                                </div>
+                                                <div className="mb-4">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        Rating
+                                                    </label>
+                                                    <div className="flex gap-1">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <button
+                                                                key={star}
+                                                                type="button"
+                                                                onClick={() => setReviewRating(star)}
+                                                                className="text-2xl focus:outline-none"
+                                                            >
+                                                                {star <= reviewRating ? '⭐' : '☆'}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div className="mb-4">
+                                                    <Textarea
+                                                        placeholder="Share your experience with this tour..."
+                                                        value={reviewComment}
+                                                        onChange={(e) => setReviewComment(e.target.value)}
+                                                        className="min-h-[120px]"
+                                                    />
+                                                </div>
+                                                <div className="flex justify-end gap-3">
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => setShowReviewForm(false)}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        onClick={handleSubmitReview}
+                                                        disabled={submittingReview || !reviewComment.trim()}
+                                                        className="bg-blue-600 hover:bg-blue-700"
+                                                    >
+                                                        {submittingReview ? (
+                                                            <>
+                                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                                Submitting...
+                                                            </>
+                                                        ) : (
+                                                            'Submit Review'
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                    
+
+                                        {/* Reviews List */}
+                                        <div className="space-y-6">
+                                            {reviewsLoading ? (
+                                                <div className="text-center py-8">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                                                </div>
+                                            ) : reviews.length > 0 ? (
+                                                reviews.map((review) => (
+                                                    <div key={review.id} className="pb-6 border-b last:border-0 last:pb-0">
+                                                        <div className="flex items-start justify-between mb-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <Avatar className="h-10 w-10">
+                                                                    <AvatarImage src={review.user.profilePic} />
+                                                                    <AvatarFallback>
+                                                                        {review.user.name.charAt(0).toUpperCase()}
+                                                                    </AvatarFallback>
+                                                                </Avatar>
+                                                                <div>
+                                                                    <h5 className="font-medium text-gray-900">
+                                                                        {review.user.name}
+                                                                    </h5>
+                                                                    <div className="flex items-center gap-2">
+                                                                        {renderStars(review.rating)}
+                                                                        <span className="text-sm text-gray-500">
+                                                                            {new Date(review.createdAt).toLocaleDateString('en-US', {
+                                                                                month: 'long',
+                                                                                year: 'numeric'
+                                                                            })}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <ThumbsUp className="h-5 w-5 text-gray-400" />
+                                                        </div>
+                                                        <p className="text-gray-700">
+                                                            {review.comment}
+                                                        </p>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="text-center py-8">
+                                                    <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                                                    <h4 className="text-lg font-medium text-gray-900 mb-2">
+                                                        No reviews yet
+                                                    </h4>
+                                                    <p className="text-gray-600">
+                                                        Be the first to review this tour!
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                         
                         </AnimatePresence>
                     </div>
 
@@ -591,8 +918,7 @@ export default function TourDetail() {
                             className="sticky top-24"
                         >
                             <div className="bg-white rounded-2xl shadow-xl border overflow-hidden">
-                                {/* Price Header */}
-                                <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white">
+                                <div className="bg-linear-to-r from-blue-600 to-cyan-500 p-6 text-white">
                                     <div className="flex items-baseline justify-between mb-2">
                                         <div>
                                             <span className="text-3xl font-bold">${tour.fee}</span>
@@ -600,15 +926,13 @@ export default function TourDetail() {
                                         </div>
                                         <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
                                             <Star className="h-4 w-4 fill-white" />
-                                            <span className="text-sm font-medium">{tour.rating || 4.8}</span>
+                                            <span className="text-sm font-medium">{tour.averageRating}</span>
                                         </div>
                                     </div>
                                     <p className="text-white/90">Instant confirmation • Free cancellation</p>
                                 </div>
 
-                                {/* Booking Form */}
                                 <div className="p-6">
-                                    {/* Date Selection */}
                                     <div className="mb-6">
                                         <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-blue-500" />
@@ -638,7 +962,6 @@ export default function TourDetail() {
                                         </div>
                                     </div>
 
-                                    {/* Start Time Selection */}
                                     <div className="mb-6">
                                         <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
                                             <Clock className="h-4 w-4 text-blue-500" />
@@ -660,7 +983,6 @@ export default function TourDetail() {
                                         </div>
                                     </div>
 
-                                    {/* End Time Display */}
                                     {selectedStartTime && (
                                         <div className="mb-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
                                             <div className="flex justify-between items-center">
@@ -678,7 +1000,6 @@ export default function TourDetail() {
                                         </div>
                                     )}
 
-                                    {/* Participants */}
                                     <div className="mb-6">
                                         <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
                                             <Users className="h-4 w-4 text-blue-500" />
@@ -708,7 +1029,6 @@ export default function TourDetail() {
                                         </div>
                                     </div>
 
-                                    {/* Price Summary */}
                                     <div className="border-t border-gray-200 pt-6 mb-6">
                                         <div className="space-y-3">
                                             <div className="flex justify-between">
@@ -730,11 +1050,10 @@ export default function TourDetail() {
                                         </div>
                                     </div>
 
-                                    {/* Book Button */}
                                     <Button
                                         onClick={handleBookingRequest}
                                         disabled={!selectedDate || !selectedStartTime || bookingLoading}
-                                        className="w-full py-6 text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full py-6 text-lg font-bold bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {bookingLoading ? (
                                             <>
@@ -749,7 +1068,6 @@ export default function TourDetail() {
                                         )}
                                     </Button>
 
-                                    {/* Requirements Check */}
                                     {(!selectedDate || !selectedStartTime) && (
                                         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
                                             <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
@@ -759,7 +1077,6 @@ export default function TourDetail() {
                                         </div>
                                     )}
 
-                                    {/* Booking Info */}
                                     <div className="mt-6 space-y-4 text-sm text-gray-600">
                                         <div className="flex items-start gap-3">
                                             <Shield className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -777,7 +1094,6 @@ export default function TourDetail() {
                                 </div>
                             </div>
 
-                            {/* Safety Info */}
                             <div className="mt-6 bg-white rounded-2xl p-6 border">
                                 <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                     <Shield className="h-5 w-5 text-green-500" />

@@ -3,9 +3,11 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { CheckCircle, ArrowLeft, Download, Share2 } from 'lucide-react';
+import { CheckCircle, ArrowLeft, Download, Share2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { motion } from "framer-motion"
+import Link from 'next/link';
 
 // Loading fallback component
 function PaymentLoading() {
@@ -46,7 +48,7 @@ function PaymentSuccessContent() {
         },
         cache: 'no-store' // Add this for dynamic data
       });
-      
+
       const result = await response.json();
       if (result.success) {
         setBookingDetails(result.data);
@@ -83,7 +85,7 @@ function PaymentSuccessContent() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-green-50 to-white py-12">
+    <div className="min-h-screen flex justify-center items-center bg-linear-to-b from-green-50 to-white">
       <div className="max-w-2xl mx-auto px-4">
         {/* Success Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
@@ -136,56 +138,40 @@ function PaymentSuccessContent() {
           ) : (
             <div className="bg-yellow-50 rounded-xl p-6 mb-8 text-center">
               <p className="text-yellow-800">
-                Booking details could not be loaded. Please check your email for confirmation.
+                Booking details could not be loaded. Please check bookings email for confirmation.
               </p>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <Button
-              onClick={() => router.push('/my-bookings')}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              View My Bookings
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleDownloadReceipt}
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Download Receipt
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleShareBooking}
-            >
-              <Share2 className="mr-2 h-4 w-4" />
-              Share
-            </Button>
-          </div>
+       
+       <Link href={'/dashboard/tourist/bookings'}>
 
-          {/* Next Steps */}
-          <div className="border-t border-gray-200 pt-8">
-            <h4 className="text-lg font-bold text-gray-900 mb-4">What's Next?</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600 mb-2">1</div>
-                <h5 className="font-medium text-gray-900 mb-1">Check Email</h5>
-                <p className="text-sm text-gray-600">Confirmation sent to your email</p>
-              </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                <div className="text-2xl font-bold text-yellow-600 mb-2">2</div>
-                <h5 className="font-medium text-gray-900 mb-1">Prepare</h5>
-                <p className="text-sm text-gray-600">Review tour details & requirements</p>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600 mb-2">3</div>
-                <h5 className="font-medium text-gray-900 mb-1">Join Tour</h5>
-                <p className="text-sm text-gray-600">Meet at the specified time & location</p>
-              </div>
-            </div>
-          </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-16 text-center"
+            >
+              <button className="
+            inline-flex items-center gap-3
+            px-8 py-4 rounded-xl font-semibold
+            bg-linear-to-r from-gray-900 to-blue-900
+            text-white hover:from-blue-900 hover:to-gray-900
+            transition-all duration-300 shadow-lg hover:shadow-xl
+            border border-gray-800
+          ">
+              
+                View My Bookings
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </motion.div>
+       </Link>
+          
+
+
 
           {/* Back Button */}
           <div className="mt-8">

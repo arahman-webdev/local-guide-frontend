@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight, Quote, Sparkles, Award } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 // Demo Data
 const testimonials = [
@@ -186,7 +187,7 @@ export default function Testimonial() {
         </div>
 
         {/* Slider Container */}
-        <div 
+        <div
           className="relative mb-12"
           onMouseEnter={() => setAutoplay(false)}
           onMouseLeave={() => setAutoplay(true)}
@@ -225,7 +226,7 @@ export default function Testimonial() {
                 <Card className="h-full border-none shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                   {/* linear Border */}
                   <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 via-cyan-500/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-                  
+
                   <CardContent className="p-8 h-full flex flex-col">
                     {/* Quote Icon */}
                     <div className="mb-6">
@@ -262,7 +263,7 @@ export default function Testimonial() {
                           </svg>
                         </div>
                       </div>
-                      
+
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div>
@@ -273,7 +274,7 @@ export default function Testimonial() {
                             <div className="text-xs text-gray-500">{testimonial.date}</div>
                           </div>
                         </div>
-                        
+
                         {/* Location */}
                         <div className="mt-2 flex items-center gap-2">
                           <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -296,11 +297,10 @@ export default function Testimonial() {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`transition-all duration-300 ${
-                currentIndex === index
+              className={`transition-all duration-300 ${currentIndex === index
                   ? 'w-8 h-3 bg-linear-to-r from-blue-600 to-cyan-500 rounded-full'
                   : 'w-3 h-3 bg-gray-300 rounded-full hover:bg-gray-400'
-              }`}
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
@@ -316,9 +316,12 @@ export default function Testimonial() {
               Join thousands of travelers who have discovered the authentic beauty of Bangladesh with local experts.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="px-8 py-6 rounded-xl text-lg font-semibold bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300">
-                Browse All Tours
-              </Button>
+              <Link href={'/tours'}>
+                <Button className="px-8 py-6 rounded-xl text-lg font-semibold bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                  Browse All Tours
+                </Button>
+              </Link>
+
               <Button variant="outline" className="px-8 py-6 rounded-xl text-lg font-semibold border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300">
                 Read More Stories
               </Button>
