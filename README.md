@@ -1,109 +1,117 @@
-# Travel & Tour Booking Backend
+# TourMate – Full Stack Tour Management Platform
 
-# Overview: 
-A complete backend API for a Travel & Tour Booking Platform built using Node.js, Express, Prisma ORM, PostgreSQL, JWT Authentication, RBAC, SSLCommerz Payment Gateway, and Cloudinary for media uploads.
+TourMate is a modern **Next.js 16** full‑stack application that allows Tourists, Guides, and Admins to interact inside a highly optimized travel/tour marketplace. The platform includes role‑based authentication, admin dashboards, tour creation, search/explore, bookings, wishlists, profile management, and a full backend API with Prisma + PostgreSQL.
 
-# Features
-🔐 Authentication & Authorization
+---
 
-Tourist, Guide, Admin roles
+## 🚀 Features
 
-Register, Login
+### ✅ **Authentication & Authorization**
 
-Access + Refresh tokens (HTTP-only cookies)
+* JWT Access + Refresh Token flow
+* Secure cookies (httpOnly, sameSite, secure)
+* Role‑based access (ADMIN, GUIDE, TOURIST)
+* Middleware route protection in Next.js
 
-Secure token rotation
+### 🧭 **Tours Management**
 
+* Create Tours (Guide)
+* Upload images (multiple)
+* Edit/Delete Tours
+* Search by destination, category, price, date, language
+* Explore page with filters
 
-# Users
+### ❤️ **Wishlist / Favorites**
 
-View profile
+* Tourists can add/remove tours to their favorites
+* View all saved tours
 
-Update profile
+### 📅 **Booking System**
 
-Admin: block/unblock users
+* Create booking
+* Manage booking status (Admin/Guide)
+* Dynamic pricing & group size rules
 
-Guide: manage tours
+### 👤 **Profile System**
 
-# Tours
+* User profile page
+* Update name, email, picture
+* Admin overview for all users
 
-Create, update, delete (Guide/Admin)
-Upload multiple images
-List all tours with filters (price, date, category, language)
-Tour details by ID
+### 🛠️ **Admin Dashboard**
 
-# Wishlist (Favorite Tours)
+* Manage Users
+* Block / Unblock
+* Manage all tours & bookings
 
-Add to wishlist
+---
 
-Remove from wishlist
+## 🏗️ Tech Stack
 
-Get user wishlist
+### **Frontend**
 
-# 📝 Booking System
-
-Create booking
-
-Validate guide availability
-
-Booking statuses:
-
-PENDING
-
-CONFIRMED
-
-CANCELLED
-
-ONGOING
-
-COMPLETED
-
-# 💳 Payment (SSLCommerz)
-
-Initiate payment
-
-User redirected to SSLCommerz "Pay Now" page
-
-Payment success webhook
-
-Payment failed/cancel callbacks
-
-Booking auto-update after payment
-
-# ☁️ Cloudinary
-
-Upload & delete tour images
-
-# 👮 Admin Functionalities
-
-Manage users
-
-Manage guides
-
-View site statistics
-
-Manage bookings
-
-# Tech Stack
+* **Next.js 16**
+* **React Hook Form + Zod**
+* **TailwindCSS + shadcn/ui**
+* **React Query (TanStack)**
+* **Next Auth Middleware (custom)**
+* **Image Upload UI Component**
 
 
-Technology Node.js Express.js Prisma ORM PostgreSQL / MySQL TypeScript Cloudinary JWT Secure
+## 🔧 Installation & Setup
 
-# 🧩 Installation & Setup
+### 1️⃣ Clone the repository
 
-1 Clone the repository
-git clone https://github.com/arahman-webdev/local-guide-backend.git
+```bash
+git clone https://github.com/arahman-webdev/local-guide-frontend.git
+cd tourmate
+```
 
-2 Install dependencies
+### 2️⃣ Install dependencies
+
+#### Frontend
+
+```bash
+cd frontend
 npm install
+```
 
-3 Generate Prisma client
-npx prisma generate
 
-4 Run database migrations
-npx prisma migrate dev --name init
 
-5 Start the development server
-npm run dev
+### 3️⃣ Configure Environment Variables
 
-Server runs on 👉 http://localhost:5000
+Create a **.env** file in frontend
+
+Backend `.env` example:
+
+
+Frontend `.env.local` example:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
+
+
+
+### 5️⃣ Run Frontend
+
+```bash
+cd frontend
+npm run dev or bun dev
+```
+
+
+
+
+
+
+
+
+## 👨‍💻 Developer
+
+**Abdur Rahman**
+Frontend Developer (MERN / Next.js)
+📧 Email: [mdarahman5645@gmail.com](mailto:mdarahman5645@gmail.com)
+GitHub: [https://github.com/arahman-webdev](https://github.com/arahman-webdev)
+
+
