@@ -44,7 +44,7 @@ const navData = {
       { title: "Manage Users", url: "/dashboard/admin/users", icon: IconUsers },
       { title: "Manage Tours", url: "/dashboard/admin/listings", icon: IconMap },
       { title: "Bookings", url: "/dashboard/admin/bookings", icon: IconCalendar },
-      { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
+      { title: "Profile", url: "/dashboard/admin/profile", icon: IconUserCircle },
     ],
     navSecondary: [
       { title: "Settings", url: "/admin/settings", icon: IconSettings },
@@ -60,7 +60,7 @@ const navData = {
       { title: "Create Tour", url: "/dashboard/guide/create-tour", icon: IconPlus },
       { title: "Bookings Requests", url: "/dashboard/guide/bookings", icon: IconCalendar },
       { title: "My Reviews", url: "/dashboard/guide/reviews", icon: IconStar },
-      { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
+      { title: "Profile", url: "/dashboard/guide/profile", icon: IconUserCircle },
     ],
     navSecondary: [
       { title: "Settings", url: "/guide/settings", icon: IconSettings },
@@ -71,12 +71,13 @@ const navData = {
 
   TOURIST: {
     navMain: [
-   
+  
+      { title: "Dashboard", url: "/dashboard/tourist", icon: IconLayout2 },
       { title: "Browse Tours", url: "/tours", icon: IconMapSearch },
       { title: "My Bookings", url: "/dashboard/tourist/bookings", icon: IconCalendar },
-      { title: "My Reviews", url: "/dadhboard/tourist/reviews", icon: IconStar },
-      { title: "Favorites", url: "/dadhboard/tourist/favourites", icon: IconHeart },
-      { title: "Profile", url: "/dashboard/profile", icon: IconUserCircle },
+   
+      { title: "Favorites", url: "/dashboard/tourist/favorites", icon: IconHeart },
+      { title: "Profile", url: "/dashboard/tourist/profile", icon: IconUserCircle },
     ],
     navSecondary: [
       { title: "Settings", url: "/tourist/settings", icon: IconSettings },

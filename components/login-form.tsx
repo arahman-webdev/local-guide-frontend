@@ -73,12 +73,12 @@ function LoginFormContent() {
             // Fallback based on role
             if (userRole === 'ADMIN') targetUrl = '/dashboard/admin'
             else if (userRole === 'GUIDE') targetUrl = '/dashboard/guide'
-            else if (userRole === 'TOURIST') targetUrl = '/dashboard/profile'
+            else if (userRole === 'TOURIST') targetUrl = '/dashboard/tourist/profile'
           }
         } else {
           if (userRole === 'ADMIN') targetUrl = '/dashboard/admin'
           else if (userRole === 'GUIDE') targetUrl = '/dashboard/guide'
-          else if (userRole === 'TOURIST') targetUrl = '/dashboard/profile'
+          else if (userRole === 'TOURIST') targetUrl = '/dashboard/tourist'
         }
         
         router.replace(targetUrl)

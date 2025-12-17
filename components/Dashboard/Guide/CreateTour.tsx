@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 
 // PRISMA ENUM
 const categories = [
-  "FOOD", "ART", "ADVENTURE", "HISTORY", "NIGHTLIFE", 
+  "FOOD", "ART", "ADVENTURE", "HISTORY", "NIGHTLIFE",
   "NATURE", "WILDLIFE", "SHOPPING", "HERITAGE", "OTHER"
 ];
 
@@ -32,7 +32,7 @@ export const tourSchema = z.object({
   title: z.string().min(3, "Title required"),
   description: z.string().min(10, "Description is too short"),
   itinerary: z.string().min(10, "Itinerary is required"),
-  fee: z.string().min(1),
+  fee: z.string().min(250, "The fee will be minumum 250"),
   duration: z.string().min(1, "Duration required"),
   meetingPoint: z.string().min(2),
   maxGroupSize: z.string().min(1),
@@ -87,7 +87,7 @@ const ArrayInputField = ({
         <h3 className="font-semibold text-lg">{title}</h3>
       </div>
       <p className="text-sm text-gray-600">{description}</p>
-      
+
       <div className="flex gap-2">
         <Input
           value={input}
@@ -125,7 +125,7 @@ const ArrayInputField = ({
             </button>
           </div>
         ))}
-        
+
         {items.length === 0 && (
           <p className="text-sm text-gray-500 text-center py-2">
             No items added yet. Click the + button to add.
@@ -140,7 +140,7 @@ export default function CreateTour() {
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter()
-  
+
   // State for array fields
   const [includes, setIncludes] = useState<string[]>([]);
   const [excludes, setExcludes] = useState<string[]>([]);
@@ -213,7 +213,7 @@ export default function CreateTour() {
           }
           return;
         }
-        
+
         const errorMessage = result.message || "Failed to create tour";
         toast.error(errorMessage);
         return;
@@ -253,11 +253,11 @@ export default function CreateTour() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        
+
         {/* Basic Information */}
         <div className="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-100">
           <h2 className="text-xl font-bold text-blue-800 mb-4">Basic Information</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-4">
               <Input
@@ -274,11 +274,13 @@ export default function CreateTour() {
                   placeholder="Fee: 2500"
                   className="border-blue-300 focus:border-blue-500"
                 />
+                {errors.fee && <p className="text-red-500 text-sm">{errors.fee.message}</p>}
                 <Input
                   {...register("duration")}
                   placeholder="Duration: 5 Hours"
                   className="border-blue-300 focus:border-blue-500"
                 />
+                {errors.duration && <p className="text-red-500 text-sm">{errors.duration.message}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -288,12 +290,14 @@ export default function CreateTour() {
                   type="number"
                   className="border-blue-300 focus:border-blue-500"
                 />
+                {errors.maxGroupSize && <p className="text-red-500 text-sm">{errors.maxGroupSize.message}</p>}
                 <Input
                   {...register("minGroupSize")}
                   placeholder="Min Group: 1"
                   type="number"
                   className="border-blue-300 focus:border-blue-500"
                 />
+                {errors.minGroupSize && <p className="text-red-500 text-sm">{errors.minGroupSize.message}</p>}
               </div>
             </div>
 
@@ -303,13 +307,14 @@ export default function CreateTour() {
                 placeholder="Meeting Point: Bandarban Bus Station"
                 className="border-blue-300 focus:border-blue-500"
               />
-
+              {errors.meetingPoint && <p className="text-red-500 text-sm">{errors.meetingPoint.message}</p>}
               <div className="grid grid-cols-2 gap-3">
                 <Input
                   {...register("city")}
                   placeholder="City: Cox's Bazar"
                   className="border-blue-300 focus:border-blue-500"
                 />
+                {errors.city && <p className="text-red-500 text-sm">{errors.city.message}</p>}
                 <Input
                   {...register("country")}
                   placeholder="Country: Bangladesh"
@@ -329,6 +334,7 @@ export default function CreateTour() {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
             </div>
           </div>
         </div>
@@ -343,8 +349,9 @@ export default function CreateTour() {
               placeholder="Detailed description of your tour..."
               className="border-blue-300 focus:border-blue-500"
             />
+            {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
           </div>
-          
+
           <div className="space-y-4">
             <label className="font-semibold text-blue-700">Itinerary</label>
             <Textarea
@@ -353,6 +360,7 @@ export default function CreateTour() {
               placeholder="Detailed itinerary with timings..."
               className="border-blue-300 focus:border-blue-500"
             />
+            {errors.itinerary && <p className="text-red-500 text-sm">{errors.itinerary.message}</p>}
           </div>
         </div>
 
@@ -367,7 +375,7 @@ export default function CreateTour() {
             placeholder="e.g., Local guide services, Entrance fees"
             color="border-green-200 bg-green-50/50"
           />
-
+          {errors.includes && <p className="text-red-500 text-sm">{errors.includes.message}</p>}
           <ArrayInputField
             title="What's Excluded"
             description="Items and services not included in the price"
@@ -377,6 +385,7 @@ export default function CreateTour() {
             placeholder="e.g., Hotel pickup, Personal expenses"
             color="border-red-200 bg-red-50/50"
           />
+           {errors.excludes && <p className="text-red-500 text-sm">{errors.excludes.message}</p>}
 
           <ArrayInputField
             title="What to Bring"
@@ -402,7 +411,7 @@ export default function CreateTour() {
         {/* Additional Information */}
         <div className="p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100">
           <h2 className="text-xl font-bold text-purple-800 mb-4">Additional Information</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
               {...register("language")}
@@ -427,11 +436,10 @@ export default function CreateTour() {
                         setAvailableDays([...availableDays, day]);
                       }
                     }}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                      availableDays.includes(day)
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${availableDays.includes(day)
                         ? "bg-purple-600 text-white shadow-md"
                         : "bg-white text-purple-600 border border-purple-300 hover:bg-purple-50"
-                    }`}
+                      }`}
                   >
                     {day.slice(0, 3)}
                   </button>

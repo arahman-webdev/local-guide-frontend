@@ -114,25 +114,28 @@ export default function TourDetail() {
     const [submittingReview, setSubmittingReview] = useState(false);
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [userHasBooked, setUserHasBooked] = useState(false);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+    const [isCheckingFavorite, setIsCheckingFavorite] = useState(true);
 
     // Helper to convert 24h to 12h format
     const convertTo12Hour = (time24: string) => {
         if (!time24 || typeof time24 !== 'string') {
             return 'Invalid Time';
         }
-        
+
         const parts = time24.split(':');
         if (parts.length !== 2) {
             return 'Invalid Time';
         }
-        
+
         const hours = parseInt(parts[0], 10);
         const minutes = parseInt(parts[1], 10);
-        
+
         if (isNaN(hours) || isNaN(minutes)) {
             return 'Invalid Time';
         }
-        
+
         const period = hours >= 12 ? 'PM' : 'AM';
         const hours12 = hours % 12 || 12;
         return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
@@ -197,17 +200,20 @@ export default function TourDetail() {
 
                 if (tourData.success) {
                     setTour(tourData.data);
-                    
+
                     // Fetch reviews for this tour
                     const reviewsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/${tourData.data.id}`);
                     const reviewsData = await reviewsResponse.json();
-                    
+
                     if (reviewsData.success) {
                         setReviews(reviewsData.data || []);
                     }
-                    
+
                     // Check if user has booked this tour (for review eligibility)
                     checkUserBooking(tourData.data.id);
+                    
+                    // Check favorite status
+                    await checkFavoriteStatus(tourData.data.id);
                 } else {
                     setError('Tour not found');
                 }
@@ -224,6 +230,159 @@ export default function TourDetail() {
         }
     }, [params.slug]);
 
+    // Check if tour is already in favorites
+    const checkFavoriteStatus = async (tourId: string) => {
+        try {
+            const token = localStorage.getItem('accessToken');
+
+            if (!token) {
+                setIsCheckingFavorite(false);
+                return;
+            }
+
+            // Fetch user's wishlist to check if this tour is already favorited
+            const response = await fetch('https://local-guide-backend-nine.vercel.app/api/whishlist', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Wishlist data:', data);
+
+                // Check if this specific tour is in the wishlist
+                if (data.data && Array.isArray(data.data)) {
+                    const isTourInWishlist = data.data.some((item: any) => {
+                        return item.tour?.id === tourId || item.tourId === tourId;
+                    });
+                    setIsFavorite(isTourInWishlist);
+                    console.log('Is tour in wishlist:', isTourInWishlist);
+                }
+            } else if (response.status === 401) {
+                // Token expired or invalid
+                console.log('Token invalid, clearing storage');
+                localStorage.removeItem('accessToken');
+            }
+        } catch (error) {
+            console.error('Error checking favorite status:', error);
+        } finally {
+            setIsCheckingFavorite(false);
+        }
+    };
+
+    const handleAddToFavorite = async () => {
+        if (!tour?.id) return;
+        
+        try {
+            setIsFavoriteLoading(true);
+            
+            // Get token from localStorage
+            const token = localStorage.getItem('accessToken');
+            
+            if (!token) {
+                toast.error('Please login to add to favorites');
+                // Redirect to login with current page as redirect
+                const currentUrl = encodeURIComponent(window.location.pathname);
+                router.push(`/login?redirect=${currentUrl}`);
+                return;
+            }
+            
+            // API endpoint for adding to wishlist
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/wishlist/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    tourId: tour.id
+                })
+            });
+            
+            const data = await response.json();
+
+            console.log("for favorite ", data)
+            
+            if (response.ok) {
+                // Successfully added to favorites
+                setIsFavorite(true);
+                toast.success('Added to favorites');
+                console.log('Added to favorites:', data);
+            } else if (response.status === 409) {
+                // Tour already in favorites (409 Conflict from backend)
+                toast.info('This tour is already in your favorites');
+                setIsFavorite(true); // Update UI to show it's favorited
+            } else {
+                // Other errors
+                const errorMessage = data.message || `Failed to add to favorites (${response.status})`;
+                toast.error(errorMessage);
+                console.error('Favorite API error:', data);
+            }
+        } catch (error: any) {
+            console.error('Favorite error:', error);
+            toast.error(error.message || 'Something went wrong. Please try again.');
+        } finally {
+            setIsFavoriteLoading(false);
+        }
+    };
+
+    window.dispatchEvent(new Event("wishlist-updated"));
+
+  
+    const handleRemoveFavorite = async () => {
+        if (!tour?.id) return;
+        
+        try {
+            setIsFavoriteLoading(true);
+            
+            const token = localStorage.getItem('accessToken');
+            
+            if (!token) {
+                toast.error('Please login to manage favorites');
+                return;
+            }
+            
+            // API endpoint for removing from wishlist
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/whishlist/remove`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    tourId: tour.id
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                setIsFavorite(false);
+                toast.success('Removed from favorites');
+                console.log('Removed from favorites:', data);
+            } else {
+                const errorMessage = data.message || `Failed to remove from favorites`;
+                toast.error(errorMessage);
+                console.error('Remove favorite error:', data);
+            }
+        } catch (error: any) {
+            console.error('Remove favorite error:', error);
+            toast.error(error.message || 'Something went wrong.');
+        } finally {
+            setIsFavoriteLoading(false);
+        }
+    };
+  
+    const handleFavoriteToggle = async () => {
+        if (isFavorite) {
+            await handleRemoveFavorite();
+        } else {
+            await handleAddToFavorite();
+        }
+    };
+
     // Check if current user has booked this tour
     const checkUserBooking = async (tourId: string) => {
         try {
@@ -238,8 +397,8 @@ export default function TourDetail() {
 
             const result = await response.json();
             if (result.success) {
-                const hasBooked = result.data.some((booking: any) => 
-                    booking.tourId === tourId && 
+                const hasBooked = result.data.some((booking: any) =>
+                    booking.tourId === tourId &&
                     booking.status === 'COMPLETED'
                 );
                 setUserHasBooked(hasBooked);
@@ -421,15 +580,15 @@ export default function TourDetail() {
 
             if (result.success) {
                 toast.success('Review submitted successfully!');
-                
+
                 // Refresh reviews
                 const reviewsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/${tour.id}`);
                 const reviewsData = await reviewsResponse.json();
-                
+
                 if (reviewsData.success) {
                     setReviews(reviewsData.data || []);
                 }
-                
+
                 // Reset form
                 setReviewComment('');
                 setReviewRating(5);
@@ -450,7 +609,7 @@ export default function TourDetail() {
 
     // Calculate total price
     const calculateTotal = () => {
-        if (!tour) return 0;
+        if (!tour) return '0.00';
         const basePrice = tour.fee * participants;
         const serviceFee = basePrice * 0.1;
         return (basePrice + serviceFee).toFixed(2);
@@ -494,7 +653,7 @@ export default function TourDetail() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50  ">
+        <div className="min-h-screen bg-gray-50">
             {/* Hero Image Gallery */}
             <div className="relative h-[60vh] md:h-[70vh] overflow-hidden">
                 {tour.tourImages.length > 0 ? (
@@ -554,8 +713,23 @@ export default function TourDetail() {
                 </button>
 
                 <div className="absolute top-6 right-6 flex gap-2">
-                    <button  className="bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all">
-                        <Heart className="h-5 w-5" />
+                    <button 
+                        onClick={handleFavoriteToggle}
+                        disabled={isFavoriteLoading || isCheckingFavorite}
+                        className="bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative"
+                        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    >
+                        {isFavoriteLoading ? (
+                            <div className="h-5 w-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                            <Heart 
+                                className={`h-5 w-5 transition-colors ${
+                                    isFavorite 
+                                        ? 'fill-red-500 text-red-500' 
+                                        : 'text-gray-400 group-hover:text-red-400'
+                                }`}
+                            />
+                        )}
                     </button>
                     <button className="bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all">
                         <Share2 className="h-5 w-5" />
@@ -789,7 +963,7 @@ export default function TourDetail() {
                                         </div>
 
                                         {/* Review Form Modal */}
-                                    
+                                        {showReviewForm && (
                                             <div className="mb-6 p-6 bg-gray-50 rounded-xl border">
                                                 <div className="flex items-center justify-between mb-4">
                                                     <h4 className="text-lg font-bold text-gray-900">Write a Review</h4>
@@ -848,7 +1022,7 @@ export default function TourDetail() {
                                                     </Button>
                                                 </div>
                                             </div>
-                                    
+                                        )}
 
                                         {/* Reviews List */}
                                         <div className="space-y-6">
@@ -904,8 +1078,6 @@ export default function TourDetail() {
                                     </div>
                                 </motion.div>
                             )}
-
-                         
                         </AnimatePresence>
                     </div>
 

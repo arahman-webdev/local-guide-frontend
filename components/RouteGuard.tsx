@@ -44,10 +44,10 @@ export default function RouteGuard() {
       }
       
       // Otherwise redirect based on role
-      let redirectUrl = '/';
+      let redirectUrl = '/dashboard/profile';
       if (userRole === 'ADMIN') redirectUrl = '/dashboard/admin';
       else if (userRole === 'GUIDE') redirectUrl = '/dashboard/guide';
-      else if (userRole === 'TOURIST') redirectUrl = '/dashboard/profile';
+      else if (userRole === 'TOURIST') redirectUrl = '/dashboard/tourist';
       
       router.replace(redirectUrl);
       return;
@@ -73,14 +73,14 @@ export default function RouteGuard() {
       // Check if user is accessing their correct dashboard
       const shouldBeOnAdmin = userRole === 'ADMIN' && !pathname.startsWith('/dashboard/admin');
       const shouldBeOnGuide = userRole === 'GUIDE' && !pathname.startsWith('/dashboard/guide');
-      const shouldBeOnTourist = userRole === 'TOURIST' && !pathname.startsWith('/dashboard/profile');
+      const shouldBeOnTourist = userRole === 'TOURIST' && !pathname.startsWith('/dashboard/tourist');
       
       if (shouldBeOnAdmin || shouldBeOnGuide || shouldBeOnTourist) {
         console.log('Redirecting to correct dashboard based on role');
         let correctDashboard = '/dashboard';
         if (userRole === 'ADMIN') correctDashboard = '/dashboard/admin';
         else if (userRole === 'GUIDE') correctDashboard = '/dashboard/guide';
-        else if (userRole === 'TOURIST') correctDashboard = '/dashboard/profile';
+        else if (userRole === 'TOURIST') correctDashboard = '/dashboard/tourist';
         
         router.replace(correctDashboard);
         return;

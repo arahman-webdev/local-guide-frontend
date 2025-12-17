@@ -24,7 +24,7 @@ export function useRouteGuard() {
 
     if (token && isAuthPage) {
       console.log('Redirecting logged-in user from auth page');
-      let redirectUrl = '/dashboard';
+      let redirectUrl = '/dashboard/profile';
       if (userRole === 'ADMIN') redirectUrl = '/dashboard/admin';
       else if (userRole === 'GUIDE') redirectUrl = '/dashboard/guide';
       else if (userRole === 'TOURIST') redirectUrl = '/dashboard/tourist';

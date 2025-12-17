@@ -60,7 +60,7 @@ export default function TourCard({ tour }: TourCardProps) {
           </div>
           <div className="flex items-center text-gray-700">
             <Clock size={18} className="mr-2 text-blue-600" />
-            <span>{tour.duration} hours</span>
+            <span>{tour.duration}</span>
           </div>
           <div className="flex items-center text-gray-700">
             <Users size={18} className="mr-2 text-blue-600" />
