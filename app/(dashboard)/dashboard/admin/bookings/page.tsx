@@ -6,6 +6,11 @@ import { useState, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 import ManageBooking from '@/components/Dashboard/Admin/ManageBooking';
+import { Metadata } from 'next';
+
+
+
+
 
 
 export default function BookinPage() {

@@ -1,7 +1,11 @@
 import ManageTourListingTable from '@/components/Dashboard/Admin/ManageTourListings';
+import { Metadata } from 'next';
 import { unstable_noStore as noStore } from 'next/cache';
 
-
+export const metadata:Metadata ={
+    title: 'Manage Tours | Admin Panel | LocalGuide',
+  description: 'Admin dashboard for managing all tours. Approve, edit, delete, and monitor tour listings. Quality control and content management.',
+}
 
 export default async function AdminLisingPage() {
 

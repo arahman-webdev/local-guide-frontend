@@ -167,7 +167,7 @@ function LoginFormContent() {
               targetUrl = '/dashboard/guide'
               break
             case 'TOURIST':
-              targetUrl = '/dashboard/profile'
+              targetUrl = '/dashboard/tourist'
               break
           }
         }
