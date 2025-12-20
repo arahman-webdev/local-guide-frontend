@@ -1,12 +1,12 @@
 "use client";
 
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, Shield } from "lucide-react";
 import { useId, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function Password({...field}) {
+export default function Password({ ...field }) {
   const id = useId();
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
@@ -14,10 +14,13 @@ export default function Password({...field}) {
 
   return (
     <div className="*:not-first:mt-2">
-      
+
       <div className="relative">
+        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+          <Shield className="h-5 w-5" />
+        </div>
         <Input
-          className="p-6 rounded-none"
+          className="pl-12 pr-12 py-6 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 group-hover:border-blue-300"
           id={id}
           placeholder="Password"
           type={isVisible ? "text" : "password"}

@@ -3,6 +3,7 @@
 import { Star, MapPin, Trophy, CheckCircle, Users } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 interface Guide {
   id: number;
@@ -312,28 +313,35 @@ export default function TopRatedGuide() {
         </div>
 
         {/* CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-16 text-center"
-        >
-          <button className="
-            inline-flex items-center gap-3
-            px-8 py-4 rounded-xl font-semibold
-            bg-linear-to-r from-gray-900 to-blue-900
-            text-white hover:from-blue-900 hover:to-gray-900
-            transition-all duration-300 shadow-lg hover:shadow-xl
-            border border-gray-800
-          ">
-            <Users className="w-5 h-5" />
-            View All 250+ Expert Guides
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </motion.div>
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 0.6, delay: 0.3 }}
+  className="mt-16 text-center"
+>
+  <Link href="/guides" passHref>
+    <motion.a
+      className="
+        inline-flex items-center gap-3
+        px-8 py-4 rounded-xl font-semibold
+        bg-gradient-to-r from-gray-900 to-blue-900
+        text-white hover:from-blue-900 hover:to-gray-900
+        transition-all duration-300 shadow-lg hover:shadow-xl
+        border border-gray-800
+        cursor-pointer
+      "
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <Users className="w-5 h-5" />
+      View All 250+ Expert Guides
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </motion.a>
+  </Link>
+</motion.div>
       </div>
     </section>
   );
