@@ -18,13 +18,13 @@ import Link from "next/link"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useState, useEffect, Suspense } from "react"
-import { 
-  LogIn, 
-  Eye, 
-  EyeOff, 
-  Mail, 
-  Lock, 
-  Globe, 
+import {
+  LogIn,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Globe,
   Sparkles,
   User,
   Shield,
@@ -47,7 +47,7 @@ function LoginFormContent() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const redirectParam = params.get('redirect')
-      
+
       if (redirectParam) {
         try {
           const decoded = decodeURIComponent(redirectParam)
@@ -58,11 +58,11 @@ function LoginFormContent() {
           setRedirectUrl(null)
         }
       }
-      
+
       // Check if already logged in
       const token = localStorage.getItem('accessToken')
       const userRole = localStorage.getItem('userRole')
-      
+
       if (token && userRole) {
         console.log('Already logged in, redirecting...')
         let targetUrl = '/dashboard'
@@ -80,7 +80,7 @@ function LoginFormContent() {
           else if (userRole === 'GUIDE') targetUrl = '/dashboard/guide'
           else if (userRole === 'TOURIST') targetUrl = '/dashboard/tourist'
         }
-        
+
         router.replace(targetUrl)
       }
     }
@@ -94,11 +94,32 @@ function LoginFormContent() {
     }
   })
 
+  const demoCredentials = {
+    admin: {
+      email: "abrahman@gmail.com",
+      password: "admin_password",
+    },
+    tourist: {
+      email: "ar@gmail.com",
+      password: "123456",
+    },
+    guide: {
+      email: "hs@gmail.com",
+      password: "123456",
+    },
+  }
+
+  const fillDemo = (role: keyof typeof demoCredentials) => {
+    form.setValue("email", demoCredentials[role].email)
+    form.setValue("password", demoCredentials[role].password)
+  }
+
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true)
       console.log('Login attempt with:', values.email)
-      
+
       // Call backend login
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: 'POST',
@@ -118,7 +139,7 @@ function LoginFormContent() {
         // Clear any old auth data first
         localStorage.clear()
         sessionStorage.clear()
-        
+
         // Store new tokens in localStorage
         localStorage.setItem('accessToken', data.data.accessToken)
         if (data.data.refreshToken) {
@@ -127,18 +148,18 @@ function LoginFormContent() {
         localStorage.setItem('userRole', data.data.user?.role || 'TOURIST')
         localStorage.setItem('user', JSON.stringify(data.data.user || {}))
         localStorage.setItem('loginTime', Date.now().toString())
-        
+
         toast.success(data.message || "Welcome back! Login successful!")
-        
+
         const userRole = data.data.user?.role || 'TOURIST'
-        
+
         // Determine where to redirect
         let targetUrl = '/dashboard'
         if (redirectUrl) {
           targetUrl = redirectUrl
         } else {
           // No redirect param, use role-based default
-          switch(userRole.toUpperCase()) {
+          switch (userRole.toUpperCase()) {
             case 'ADMIN':
               targetUrl = '/dashboard/admin'
               break
@@ -150,19 +171,19 @@ function LoginFormContent() {
               break
           }
         }
-        
+
         console.log('Login successful, redirecting to:', targetUrl)
-        
+
         // Use window.location for a clean redirect
         window.location.href = targetUrl
-        
+
       } else {
         const errorMessage = data.message || "Login failed. Please check your credentials."
         toast.error(errorMessage)
       }
     } catch (error: any) {
       console.error('Login error:', error)
-      
+
       if (error.name === 'TypeError' || error.message?.includes('Failed to fetch')) {
         toast.error("Cannot connect to server. Please check your internet connection.")
       } else {
@@ -206,7 +227,7 @@ function LoginFormContent() {
               Enter your credentials to access your dashboard
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -238,7 +259,7 @@ function LoginFormContent() {
                     </FormItem>
                   )}
                 />
-                
+
                 {/* Password Field */}
                 <FormField
                   control={form.control}
@@ -286,6 +307,35 @@ function LoginFormContent() {
                     </FormItem>
                   )}
                 />
+
+                {/* Demo Login Buttons */}
+                <div className="grid grid-cols-3 gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => fillDemo("admin")}
+                    className="rounded-xl bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Admin
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={() => fillDemo("tourist")}
+                    className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Tourist
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={() => fillDemo("guide")}
+                    className="rounded-xl bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Guide
+                  </Button>
+                </div>
+
+
 
                 {/* Login Button */}
                 <Button
