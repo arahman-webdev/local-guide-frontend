@@ -9,6 +9,12 @@ import { Sparkles, ArrowRight, MapPin, Users, Clock, Star } from "lucide-react";
 // Imported local images
 import art from "@/app/images/art.png";
 import food from "@/app/images/food.png";
+import adventure from "@/app/images/adventure.png";
+import history from "@/app/images/history.webp";
+import nightlife from "@/app/images/nightlife.avif";
+import shopping from "@/app/images/shopping.webp";
+import herritage from "@/app/images/herritage.webp";
+import nature from "@/app/images/nature.avif";
 
 const categories = [
   { 
@@ -31,7 +37,7 @@ const categories = [
   },
   { 
     name: "ADVENTURE", 
-    image: "/images/categories/adventure.jpg",
+    image: adventure,
     icon: "🧗",
     description: "Thrilling outdoor experiences",
     count: 112,
@@ -40,7 +46,7 @@ const categories = [
   },
   { 
     name: "HISTORY", 
-    image: "/images/categories/history.jpg",
+    image: history,
     icon: "🏛️",
     description: "Ancient sites & heritage walks",
     count: 94,
@@ -49,7 +55,7 @@ const categories = [
   },
   { 
     name: "NIGHTLIFE", 
-    image: "/images/categories/nightlife.jpg",
+    image: nightlife,
     icon: "🌃",
     description: "Evening entertainment & bars",
     count: 67,
@@ -58,7 +64,7 @@ const categories = [
   },
   { 
     name: "SHOPPING", 
-    image: "/images/categories/shopping.jpg",
+    image: shopping,
     icon: "🛍️",
     description: "Local markets & artisan goods",
     count: 78,
@@ -67,7 +73,7 @@ const categories = [
   },
   { 
     name: "HERITAGE", 
-    image: "/images/categories/heritage.jpg",
+    image: herritage,
     icon: "🏯",
     description: "Cultural heritage & traditions",
     count: 103,
@@ -76,7 +82,7 @@ const categories = [
   },
   { 
     name: "NATURE", 
-    image: "/images/categories/other.jpg",
+    image: nature,
     icon: "🌿",
     description: "Natural wonders & wildlife",
     count: 124,

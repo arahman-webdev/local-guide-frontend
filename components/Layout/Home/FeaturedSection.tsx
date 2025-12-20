@@ -253,7 +253,7 @@ export default function FeaturedDestinations() {
             <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 blur-xl rounded-full"></div>
             
             <Link
-              href="/destinations"
+              href="/tours"
               className="relative inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-gray-900 to-gray-800 text-white font-semibold rounded-2xl hover:shadow-2xl transition-all duration-300 group/cta border border-gray-800"
             >
               <span className="text-lg">Explore All 80+ Destinations</span>
