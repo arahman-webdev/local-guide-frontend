@@ -243,16 +243,16 @@ export default function Navbar() {
   );
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b shadow-sm supports-[backdrop-filter]:bg-white/60">
+    <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b p-3 shadow-sm supports-backdrop-filter:bg-white/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="relative h-10 w-10">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl" />
+              <div className="absolute inset-0 bg-linear-to-br from-blue-600 to-cyan-500 rounded-xl" />
               <div className="absolute inset-1 bg-white rounded-lg flex items-center justify-center">
-                <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                <span className="text-lg font-bold bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                   LG
                 </span>
               </div>
@@ -313,7 +313,7 @@ export default function Navbar() {
                           ? "/dashboard/guide"
                           : "/dashboard/tourist"
                       }
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all hover:-translate-y-0.5"
+                      className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all hover:-translate-y-0.5"
                     >
                       <User className="h-4 w-4" />
                       <span className="font-medium">Dashboard</span>
@@ -322,7 +322,7 @@ export default function Navbar() {
                     <div className="relative group">
                       <Avatar className="h-9 w-9 cursor-pointer border-2 border-transparent group-hover:border-blue-500 transition-colors">
                         <AvatarImage src={user.profilePic} alt={user.name} />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                        <AvatarFallback className="bg-linear-to-br from-blue-500 to-cyan-500 text-white">
                           {user.name?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
@@ -356,7 +356,7 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/signup"
-                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all hover:-translate-y-0.5"
+                      className="px-4 py-2 bg-linear-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all hover:-translate-y-0.5"
                     >
                       Get Started
                     </Link>
@@ -419,7 +419,7 @@ export default function Navbar() {
                     <div className="flex items-center gap-3 px-4 mb-4">
                       <Avatar>
                         <AvatarImage src={user.profilePic} />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                        <AvatarFallback className="bg-linear-to-br from-blue-500 to-cyan-500 text-white">
                           {user.name?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -470,7 +470,7 @@ export default function Navbar() {
                     <Link
                       href="/signup"
                       onClick={() => setIsOpen(false)}
-                      className="block px-4 py-3 text-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg font-medium hover:shadow-lg"
+                      className="block px-4 py-3 text-center bg-linear-to-r from-blue-600 to-cyan-500 text-white rounded-lg font-medium hover:shadow-lg"
                     >
                       Create Account
                     </Link>

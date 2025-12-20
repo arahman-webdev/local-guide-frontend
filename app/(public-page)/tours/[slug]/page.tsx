@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function TourDetailPage() {
     return (
-        <div className='pt-20'>
+        <div className=''>
             <TourDetail />
         </div>
     )

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Search, Sparkles, MapPin, Star, Users, Globe } from 'lucide-react';
 import Link from 'next/link';
-import heroBg from "@/app/images/hero-bg.png";
+import heroBg from "@/app/images/bg-hero.webp";
 
 export default function Hero() {
   const router = useRouter();

@@ -16,6 +16,8 @@ import {
   Calendar,
   Heart
 } from "lucide-react";
+import { useState } from "react";
+import BackToTopButton from "./BackToTopButton";
 
 const Footer = () => {
   const pathname = usePathname();
@@ -23,6 +25,8 @@ const Footer = () => {
   const isActive = (path: string) => {
     return pathname === path;
   };
+
+  const [active, setActive] = useState(false)
 
   return (
     <footer className="bg-linear-to-b from-gray-900 to-black text-white">
@@ -252,15 +256,10 @@ const Footer = () => {
       </div>
 
       {/* Back to Top */}
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-6 right-6 p-3 bg-linear-to-r from-cyan-500 to-blue-600 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 z-50"
-        aria-label="Back to top"
-      >
-        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-        </svg>
-      </button>
+
+
+<BackToTopButton />
+      
     </footer>
   );
 };

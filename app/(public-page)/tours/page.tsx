@@ -5,7 +5,7 @@ import ExploreTour from '@/components/Public/ExploreTour'
 
 export default function TourPage() {
   return (
-    <div className='py-20'>
+    <div className=''>
         <ExploreTour />
     </div>
   )

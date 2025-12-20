@@ -11,6 +11,7 @@ import parisImage from "@/app/images/paris.webp"
 import bangkokImage from "@/app/images/bankok.jpg"
 import newyorkImage from "@/app/images/newyork.jpg"
 import tokyoImage from "@/app/images/Tokyo-scaled.jpg"
+import { useRouter } from "next/navigation"
 
 const featuredCities = [
   {
@@ -73,6 +74,7 @@ const featuredCities = [
 
 export default function FeaturedDestinations() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
+  const router = useRouter()
 
   return (
     <section className="relative py-24 bg-gradient-to-b from-white via-gray-50/50 to-white">
@@ -219,13 +221,14 @@ export default function FeaturedDestinations() {
                       whileHover={{ x: 5 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <Link
-                        href={`/destinations/${city.id}`}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 group/btn"
+                      <div
+                      onClick={() => router.push(`/tours?category=${city.name}`)}
+                        
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 group/btn cursor-pointer"
                       >
                         Explore
                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </Link>
+                      </div>
                     </motion.div>
                   </div>
                 </div>
