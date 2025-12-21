@@ -78,11 +78,7 @@ export async function proxy(request: NextRequest) {
         '/blog',
         '/tours',
         '/tours/[slug]',
-        '/api/auth/login',
-        '/api/auth/signup',
-        '/api/auth/logout',
-        '/api/tour',
-        '/api/payment',
+        '/api/',
         '/_next/',
         '/public/',
         '/favicon.ico',
@@ -94,8 +90,8 @@ export async function proxy(request: NextRequest) {
         if (route === '/tours' && pathname.startsWith('/tours/')) {
             return true; // All tour detail pages
         }
-        if (route === '/api/' && pathname.startsWith('/api/')) {
-            return true; // API auth handled by backend
+        if (route === '/api/') {
+            return true; // All API routes are public, backend handles auth
         }
         return pathname === route || pathname.startsWith(route);
     });
@@ -104,55 +100,17 @@ export async function proxy(request: NextRequest) {
         return NextResponse.next();
     }
     
-    // ========== AUTH ROUTES ==========
-    const authRoutes = ['/login', '/signup', '/register', '/forgot-password'];
-    const isAuthRoute = authRoutes.includes(pathname);
-    
-    // ========== GET TOKEN FROM HEADERS ==========
-    // Middleware can't read localStorage, so frontend must send token in headers
-    const token = request.headers.get('authorization')?.replace('Bearer ', '') ||
-                 request.headers.get('x-access-token');
-    
-    // Get user role from headers
-    const userRole = request.headers.get('x-user-role');
-    
-    console.log(`[Middleware] Token from headers: ${token ? 'YES' : 'NO'}`);
-    console.log(`[Middleware] User role: ${userRole || 'NOT FOUND'}`);
-    
-    // ========== RULE 1: Block logged-in users from auth routes ==========
-    if (token && isAuthRoute) {
-        console.log(`[Middleware] Logged-in user trying to access ${pathname}, redirecting...`);
-        
-        // Redirect based on role
-        let redirectUrl = '/dashboard';
-        if (userRole === 'ADMIN') redirectUrl = '/dashboard/admin';
-        if (userRole === 'GUIDE') redirectUrl = '/dashboard/guide';
-        if (userRole === 'TOURIST') redirectUrl = '/dashboard/tourist';
-        
-        return NextResponse.redirect(new URL(redirectUrl, request.url));
-    }
-    
-    // ========== RULE 2: Protect dashboard routes ==========
+    // ========== PROTECT DASHBOARD ROUTES ONLY ==========
     if (pathname.startsWith('/dashboard')) {
+        // Try to get token from cookies
+        const token = request.cookies.get('accessToken')?.value ||
+                     request.cookies.get('token')?.value;
+        
         if (!token) {
             console.log(`[Middleware] No token for ${pathname}, redirecting to login`);
             const loginUrl = new URL('/login', request.url);
             loginUrl.searchParams.set('redirect', pathname);
             return NextResponse.redirect(loginUrl);
-        }
-        
-        // ========== RULE 3: Role-based access (optional) ==========
-        // You can remove this if you don't need strict role separation
-        if (userRole) {
-            const isAdminRoute = pathname.startsWith('/dashboard/admin');
-            const isGuideRoute = pathname.startsWith('/dashboard/guide');
-            const isTouristRoute = pathname.startsWith('/dashboard/profile');
-            
-            // Basic role checks - customize as needed
-            if (isAdminRoute && userRole !== 'ADMIN') {
-                console.log(`[Middleware] Role mismatch for ${pathname}`);
-                return NextResponse.redirect(new URL('/dashboard', request.url));
-            }
         }
     }
     
@@ -162,10 +120,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
     matcher: [
-        // Protect only specific routes
+        // Only protect dashboard routes
         '/dashboard/:path*',
-        '/login',
-        '/signup',
-        '/register',
     ],
 };

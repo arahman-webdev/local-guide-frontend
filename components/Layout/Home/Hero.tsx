@@ -28,7 +28,6 @@ export default function Hero() {
     { name: 'Sylhet', type: 'city', icon: '🍵' },
     { name: 'Cox\'s Bazar', type: 'beach', icon: '🏖️' },
     { name: 'Sundarbans', type: 'nature', icon: '🐯' },
-    
   ];
 
   const popularCategories = [
@@ -71,7 +70,7 @@ export default function Hero() {
             <Star className="w-4 h-4 text-yellow-300 ml-2" />
           </div>
 
-          <h1 className="text-5xl md:text-7xl  font-bold mb-6 leading-tight text-center">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-center">
             <span className="bg-linear-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent">
               Discover Bangladesh
             </span>
@@ -204,27 +203,28 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 items-center">
-            <Link href="/register?role=guide" className="group relative">
-              <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-cyan-500 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition duration-300"></div>
-              <Button className="relative bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold px-10 py-6 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02]">
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  Become a Local Guide
-                </span>
-              </Button>
-            </Link>
+          {/* CTA Buttons - FIXED */}
+          <div className="flex flex-col sm:flex-row gap-6 items-center z-50">
+            {/* Button 1 - Fixed */}
+            <Button
+              onClick={() => router.push('/signup?role=guide')}
+              className="group relative overflow-hidden bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold px-10 py-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02] cursor-pointer "
+            >
+              <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-cyan-500 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition duration-300 -z-10"></div>
+              <span className="relative flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Become a Local Guide
+              </span>
+            </Button>
 
-            <Link href="/tours">
-              <Button 
-                variant="outline" 
-                className="border-2 border-white/30 hover:border-white/50 bg-transparent hover:bg-white/10 text-white px-10 py-6 rounded-2xl text-lg font-bold transition-all duration-300"
-              >
-                Browse All Experiences →
-              </Button>
-            </Link>
-           
+            {/* Button 2 - Fixed */}
+            <Button
+              onClick={() => router.push('/tours')}
+              variant="outline"
+              className="border-2 border-white/30 hover:border-white/50 bg-transparent hover:bg-white/10 text-white px-10 py-8 rounded-2xl text-lg font-bold transition-all duration-300 cursor-pointer"
+            >
+              Browse All Experiences →
+            </Button>
           </div>
         </div>
       </div>

@@ -391,7 +391,7 @@ export default function TouristDashboard() {
                   </div>
                   {favorites.length > 0 && (
                     <Button variant="outline" size="sm" asChild>
-                      <Link href="/favorites">
+                      <Link href="/dashboard/tourist/favorites">
                         View All
                         <ChevronRight className="ml-1 h-4 w-4" />
                       </Link>
