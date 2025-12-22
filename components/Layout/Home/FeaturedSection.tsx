@@ -16,10 +16,10 @@ import { useRouter } from "next/navigation"
 const featuredCities = [
   {
     id: 1,
-    name: "Paris",
-    country: "France",
+    name: "Bandorban",
+    country: "Bangladesh",
     image: parisImage,
-    tours: 42,
+    tours: 20,
     rating: 4.8,
     reviews: 1250,
 
@@ -30,8 +30,8 @@ const featuredCities = [
   },
   {
     id: 2,
-    name: "Bangkok",
-    country: "Thailand",
+    name: "Sylhet",
+    country: "Bangladesh",
     image: bangkokImage,
     tours: 38,
     rating: 4.7,
@@ -44,8 +44,8 @@ const featuredCities = [
   },
   {
     id: 3,
-    name: "New York",
-    country: "USA",
+    name: "Dhaka",
+    country: "Bangladesh",
     image: newyorkImage,
     tours: 56,
     rating: 4.9,
@@ -58,8 +58,8 @@ const featuredCities = [
   },
   {
     id: 4,
-    name: "Tokyo",
-    country: "Japan",
+    name: "Chittagong",
+    country: "Bangladesh",
     image: tokyoImage,
     tours: 35,
     rating: 4.6,
@@ -222,7 +222,7 @@ export default function FeaturedDestinations() {
                       transition={{ duration: 0.2 }}
                     >
                       <div
-                      onClick={() => router.push(`/tours?category=${city.name}`)}
+                      onClick={() => router.push(`/tours?city=${city.name}`)}
                         
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 group/btn cursor-pointer"
                       >
@@ -259,7 +259,7 @@ export default function FeaturedDestinations() {
               href="/tours"
               className="relative inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-gray-900 to-gray-800 text-white font-semibold rounded-2xl hover:shadow-2xl transition-all duration-300 group/cta border border-gray-800"
             >
-              <span className="text-lg">Explore All 80+ Destinations</span>
+              <span className="text-lg">Explore All 15+ Destinations</span>
               <ArrowRight className="w-5 h-5 group-hover/cta:translate-x-2 transition-transform" />
             </Link>
           </div>

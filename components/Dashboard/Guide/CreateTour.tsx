@@ -286,8 +286,8 @@ export default function CreateTour() {
         setRequirements([]);
         setTags([]);
         setAvailableDays([]);
-        // form.reset();
-        // router.push('/dashboard/guide/my-tours')
+        form.reset();
+        router.push('/dashboard/guide/my-tours')
       }
 
     } catch (err: any) {
