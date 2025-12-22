@@ -28,26 +28,83 @@ const categories = [
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 // ⭐ ZOD SCHEMA
+
+
 export const tourSchema = z.object({
-  title: z.string().min(3, "Title required"),
-  description: z.string().min(10, "Description is too short"),
-  itinerary: z.string().min(10, "Itinerary is required"),
-  fee: z.string().min(250, "The fee will be minumum 250"),
-  duration: z.string().min(1, "Duration required"),
-  meetingPoint: z.string().min(2),
-  maxGroupSize: z.string().min(1),
-  minGroupSize: z.string().min(1),
-  category: z.string().min(1),
-  language: z.string().min(1),
-  city: z.string().min(1),
-  country: z.string().min(1),
+  title: z
+    .string()
+    .min(3, { message: "Title must be at least 3 characters long" }),
+
+  description: z
+    .string()
+    .min(10, { message: "Description must be at least 10 characters long" }),
+
+  itinerary: z
+    .string()
+    .min(10, { message: "Itinerary must be at least 10 characters long" }),
+
+  fee: z
+    .string()
+    .nonempty({ message: "Fee is required" })
+    .refine((val) => !isNaN(Number(val)), {
+      message: "Fee must be a valid number",
+    })
+    .refine((val) => Number(val) >= 250, {
+      message: "Fee must be at least 250",
+    }),
+
+  duration: z
+    .string()
+    .nonempty({ message: "Duration is required" }),
+
+  meetingPoint: z
+    .string()
+    .min(2, { message: "Meeting point must be at least 2 characters" }),
+
+  maxGroupSize: z
+    .string()
+    .nonempty({ message: "Maximum group size is required" })
+    .refine((v) => !isNaN(Number(v)), {
+      message: "Maximum group size must be a number",
+    })
+    .refine((v) => Number(v) > 0, {
+      message: "Maximum group size must be greater than 0",
+    }),
+
+  minGroupSize: z
+    .string()
+    .nonempty({ message: "Minimum group size is required" })
+    .refine((v) => !isNaN(Number(v)), {
+      message: "Minimum group size must be a number",
+    })
+    .refine((v) => Number(v) > 0, {
+      message: "Minimum group size must be greater than 0",
+    }),
+
+  category: z
+    .string()
+    .min(1, { message: "Please select a tour category" }),
+
+  language: z
+    .string()
+    .min(1, { message: "At least one language is required" }),
+
+  city: z
+    .string()
+    .min(1, { message: "City is required" }),
+
+  country: z
+    .string()
+    .min(1, { message: "Country is required" }),
+
   tags: z.string().optional(),
-  // New fields
+
   includes: z.string().optional(),
   excludes: z.string().optional(),
   whatToBring: z.string().optional(),
   requirements: z.string().optional(),
 });
+
 
 // Component for array input fields
 const ArrayInputField = ({
@@ -229,8 +286,8 @@ export default function CreateTour() {
         setRequirements([]);
         setTags([]);
         setAvailableDays([]);
-        form.reset();
-        router.push('/dashboard/guide/my-tours')
+        // form.reset();
+        // router.push('/dashboard/guide/my-tours')
       }
 
     } catch (err: any) {
@@ -385,7 +442,7 @@ export default function CreateTour() {
             placeholder="e.g., Hotel pickup, Personal expenses"
             color="border-red-200 bg-red-50/50"
           />
-           {errors.excludes && <p className="text-red-500 text-sm">{errors.excludes.message}</p>}
+          {errors.excludes && <p className="text-red-500 text-sm">{errors.excludes.message}</p>}
 
           <ArrayInputField
             title="What to Bring"
@@ -437,8 +494,8 @@ export default function CreateTour() {
                       }
                     }}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${availableDays.includes(day)
-                        ? "bg-purple-600 text-white shadow-md"
-                        : "bg-white text-purple-600 border border-purple-300 hover:bg-purple-50"
+                      ? "bg-purple-600 text-white shadow-md"
+                      : "bg-white text-purple-600 border border-purple-300 hover:bg-purple-50"
                       }`}
                   >
                     {day.slice(0, 3)}

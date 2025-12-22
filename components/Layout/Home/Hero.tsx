@@ -118,7 +118,7 @@ export default function Hero() {
 
                     <Button
                       type="submit"
-                      className="group relative overflow-hidden bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold px-10 py-6 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl"
+                      className="group relative overflow-hidden bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold px-10 py-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl cursor-pointer"
                     >
                       <span className="relative z-10 flex items-center gap-2">
                         <Search className="w-5 h-5" />
@@ -204,7 +204,7 @@ export default function Hero() {
           </div>
 
           {/* CTA Buttons - FIXED */}
-          <div className="flex flex-col sm:flex-row gap-6 items-center z-50">
+          <div className="flex flex-col sm:flex-row gap-6 items-center z-10">
             {/* Button 1 - Fixed */}
             <Button
               onClick={() => router.push('/signup?role=guide')}

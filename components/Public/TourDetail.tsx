@@ -611,8 +611,8 @@ export default function TourDetail() {
     const calculateTotal = () => {
         if (!tour) return '0.00';
         const basePrice = tour.fee * participants;
-        const serviceFee = basePrice * 0.1;
-        return (basePrice + serviceFee).toFixed(2);
+        
+        return basePrice 
     };
 
     // Render star rating
@@ -723,17 +723,15 @@ export default function TourDetail() {
                             <div className="h-5 w-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin"></div>
                         ) : (
                             <Heart 
-                                className={`h-5 w-5 transition-colors ${
+                                className={`h-5 w-5 transition-colors cursor-pointer ${
                                     isFavorite 
                                         ? 'fill-red-500 text-red-500' 
-                                        : 'text-gray-400 group-hover:text-red-400'
+                                        : 'text-red-600 group-hover:text-gray-400'
                                 }`}
                             />
                         )}
                     </button>
-                    <button className="bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all">
-                        <Share2 className="h-5 w-5" />
-                    </button>
+                  
                 </div>
 
                 <div className="absolute bottom-6 left-6">
@@ -838,6 +836,7 @@ export default function TourDetail() {
                                         <h3 className="text-2xl font-bold text-gray-900 mb-4">About this experience</h3>
                                         <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                                             {tour.description}
+                                            
                                         </p>
                                     </div>
 
@@ -951,7 +950,7 @@ export default function TourDetail() {
                                                     <span className="text-gray-600">· {tour.reviewCount || 0} reviews</span>
                                                 </div>
                                             </div>
-                                            {userHasBooked && (
+                                            
                                                 <Button
                                                     onClick={() => setShowReviewForm(true)}
                                                     className="bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600"
@@ -959,7 +958,7 @@ export default function TourDetail() {
                                                     <MessageSquare className="h-4 w-4 mr-2" />
                                                     Write a Review
                                                 </Button>
-                                            )}
+                                        
                                         </div>
 
                                         {/* Review Form Modal */}
@@ -986,7 +985,7 @@ export default function TourDetail() {
                                                                 onClick={() => setReviewRating(star)}
                                                                 className="text-2xl focus:outline-none"
                                                             >
-                                                                {star <= reviewRating ? '⭐' : '☆'}
+                                                                {star <= reviewRating ? <Star className='fill-yellow-400 text-yellow-400' /> : '☆'}
                                                             </button>
                                                         ))}
                                                     </div>
@@ -1093,7 +1092,7 @@ export default function TourDetail() {
                                 <div className="bg-linear-to-r from-blue-600 to-cyan-500 p-6 text-white">
                                     <div className="flex items-baseline justify-between mb-2">
                                         <div>
-                                            <span className="text-3xl font-bold">${tour.fee}</span>
+                                            <span className="text-3xl font-bold">৳{tour.fee}</span>
                                             <span className="text-white/80 ml-1">/person</span>
                                         </div>
                                         <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
@@ -1204,18 +1203,15 @@ export default function TourDetail() {
                                     <div className="border-t border-gray-200 pt-6 mb-6">
                                         <div className="space-y-3">
                                             <div className="flex justify-between">
-                                                <span className="text-gray-600">${tour.fee} × {participants} person(s)</span>
+                                                <span className="text-gray-600">৳{tour.fee} × {participants} person(s)</span>
                                                 <span className="font-medium">${(tour.fee * participants).toFixed(2)}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Service fee</span>
-                                                <span className="font-medium">${(tour.fee * participants * 0.1).toFixed(2)}</span>
-                                            </div>
+                                           
                                             <div className="border-t border-gray-200 pt-3">
                                                 <div className="flex justify-between text-lg font-bold">
                                                     <span>Total</span>
                                                     <span className="text-blue-600">
-                                                        ${calculateTotal()}
+                                                        ৳{calculateTotal()}
                                                     </span>
                                                 </div>
                                             </div>

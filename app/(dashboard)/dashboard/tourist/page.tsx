@@ -54,7 +54,7 @@ interface TouristStats {
   upcomingTours: number;
   completedTours: number;
   totalSpent: number;
-  reviewsWritten: number;
+  totalReviewd: number;
   wishlistCount: number;
   favoriteCategory: string;
 }
@@ -67,7 +67,7 @@ export default function TouristDashboard() {
     upcomingTours: 0,
     completedTours: 0,
     totalSpent: 0,
-    reviewsWritten: 0,
+    totalReviewd: 0,
     wishlistCount: 0,
     favoriteCategory: 'Adventure'
   });
@@ -144,7 +144,7 @@ export default function TouristDashboard() {
     } catch (error: any) {
       console.error('Error fetching tourist data:', error);
       toast.error('Failed to load dashboard data');
-      setMockData();
+      
     } finally {
       setLoading(false);
     }
@@ -165,6 +165,8 @@ export default function TouristDashboard() {
         }
       }
 
+      console.log("bookings data", bookingsData)
+
       // Calculate statistics from bookings
       const upcomingTours = bookingsData.filter((b: any) =>
         ['CONFIRMED', 'PENDING'].includes(b.status)
@@ -175,8 +177,12 @@ export default function TouristDashboard() {
       ).length;
 
       const totalSpent = bookingsData.reduce((sum: number, booking: any) =>
-        booking.status === 'COMPLETED' ? sum + (booking.totalAmount || booking.amount || 0) : sum, 0
+        booking.status === 'COMPLETED' ? sum + (booking?.payment?.amount || 0) : sum, 0
       );
+
+      const totalReviewd = bookingsData.filter((b)=>b.hasReviewed).length
+
+      console.log("total spent",totalSpent)
 
       // Update stats
       setStats(prev => ({
@@ -184,7 +190,8 @@ export default function TouristDashboard() {
         totalBookings: bookingsData.length,
         upcomingTours,
         completedTours,
-        totalSpent
+        totalSpent,
+        totalReviewd
       }));
 
       // Fetch recommendations (if API exists)
@@ -233,43 +240,7 @@ export default function TouristDashboard() {
     }
   };
 
-  const setMockData = () => {
-    // Keep existing favorites if any, otherwise use mock
-    if (favorites.length === 0) {
-      setFavorites([
-        {
-          id: '1',
-          wishlistId: 'wish1',
-          tour: {
-            id: 'tour1',
-            title: 'Cox\'s Bazar Beach Tour',
-            slug: 'coxs-bazar-beach-tour',
-            description: 'Amazing beach experience',
-            fee: 120,
-            duration: '4 hours',
-            maxGroupSize: 15,
-            city: 'Cox\'s Bazar',
-            country: 'Bangladesh',
-            category: 'BEACH',
-            averageRating: 4.8,
-            reviewCount: 12,
-            tourImages: [{ id: 'img1', imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e' }]
-          },
-          createdAt: '2024-12-01'
-        }
-      ]);
-    }
-    
-    setStats({
-      totalBookings: 8,
-      upcomingTours: 2,
-      completedTours: 6,
-      totalSpent: 960,
-      reviewsWritten: 3,
-      wishlistCount: favorites.length || 1,
-      favoriteCategory: 'Adventure',
-    });
-  };
+
 
   if (loading) {
     return (
@@ -281,6 +252,8 @@ export default function TouristDashboard() {
       </div>
     );
   }
+
+  console.log("from stats", )
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/30 to-white p-4 md:p-6 lg:p-8">
@@ -340,7 +313,7 @@ export default function TouristDashboard() {
                 <span className="text-3xl font-bold text-gray-900">{stats.completedTours}</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Completed Tours</h3>
-              <p className="text-sm text-gray-600">${stats.totalSpent} total spent</p>
+              <p className="text-sm text-gray-600">৳{stats.totalSpent} total spent</p>
             </CardContent>
           </Card>
 
@@ -363,7 +336,7 @@ export default function TouristDashboard() {
                 <div className="p-3 bg-yellow-100 rounded-xl">
                   <Star className="h-6 w-6 text-yellow-600" />
                 </div>
-                <span className="text-3xl font-bold text-gray-900">{stats.reviewsWritten}</span>
+                <span className="text-3xl font-bold text-gray-900">{stats.totalReviewd}</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Reviews Written</h3>
               <p className="text-sm text-gray-600">Help others choose</p>
